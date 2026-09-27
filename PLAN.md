@@ -4,19 +4,19 @@ Source of truth: the build brief. This file covers how the work is split up and 
 
 ## Milestones
 
-| # | Scope | Done when |
-|---|---|---|
-| M0 | Monorepo (npm workspaces), strict TS, ESLint + Prettier, Vitest, PLAN/DECISIONS | `npm test`, `npm run lint`, `npm run typecheck` pass on an empty skeleton |
-| M1 | `/shared`: zod schemas, ids, dates, `logicalDate`, quadrant, next action, history, suggestions, quick-add parser, merge | All pure logic has unit tests |
-| M2 | `/server`: in-memory store + atomic JSON persistence, write queue, validation, tombstones, backups, migrations, archiving, auth, every V1 endpoint | API tests cover sync merge, tombstones, auth, import/export, crash-safe writes |
-| M3 | Client data layer: IndexedDB, Zustand store, outbox, sync loop, offline/error indicators, login | App boots offline from IndexedDB; edits sync |
-| M4 | My Day, Frog card, task rows, dimming, task detail (sheet/panel), steps + Slice it, notes, completion + undo, hints, "Due today, not planned", quick add | Acceptance 1, 2, 5, 6 |
-| M5 | Matrix (desktop 2×2 drag, mobile overview + quadrant view), Move to…, due-date conflict prompt, Delegate fields, Drop auto-archive, Lists CRUD, Completed/Archived, search | Acceptance 3 |
-| M6 | Focus Mode: presets, wall-clock timer, wake lock, end screen, session log, reload recovery | Acceptance 7 |
-| M7 | Evening planning: banner, 3-step flow, "Plan today", slipping prompt | Acceptance 4 |
-| M8 | Settings, export/import, sign out, manifest, icons, service worker, update toast, iOS tip | Acceptance 11, 12 |
-| M9 | `/deploy`: systemd, Nginx, env, deploy script, DEPLOY.md | Written down step by step |
-| M10 | Polish pass at 320/390/768/1280, light/dark, keyboard only, reduced motion | Acceptance 13 |
+| #   | Scope                                                                                                                                                                      | Done when                                                                      |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| M0  | Monorepo (npm workspaces), strict TS, ESLint + Prettier, Vitest, PLAN/DECISIONS                                                                                            | `npm test`, `npm run lint`, `npm run typecheck` pass on an empty skeleton      |
+| M1  | `/shared`: zod schemas, ids, dates, `logicalDate`, quadrant, next action, history, suggestions, quick-add parser, merge                                                    | All pure logic has unit tests                                                  |
+| M2  | `/server`: in-memory store + atomic JSON persistence, write queue, validation, tombstones, backups, migrations, archiving, auth, every V1 endpoint                         | API tests cover sync merge, tombstones, auth, import/export, crash-safe writes |
+| M3  | Client data layer: IndexedDB, Zustand store, outbox, sync loop, offline/error indicators, login                                                                            | App boots offline from IndexedDB; edits sync                                   |
+| M4  | My Day, Frog card, task rows, dimming, task detail (sheet/panel), steps + Slice it, notes, completion + undo, hints, "Due today, not planned", quick add                   | Acceptance 1, 2, 5, 6                                                          |
+| M5  | Matrix (desktop 2×2 drag, mobile overview + quadrant view), Move to…, due-date conflict prompt, Delegate fields, Drop auto-archive, Lists CRUD, Completed/Archived, search | Acceptance 3                                                                   |
+| M6  | Focus Mode: presets, wall-clock timer, wake lock, end screen, session log, reload recovery                                                                                 | Acceptance 7                                                                   |
+| M7  | Evening planning: banner, 3-step flow, "Plan today", slipping prompt                                                                                                       | Acceptance 4                                                                   |
+| M8  | Settings, export/import, sign out, manifest, icons, service worker, update toast, iOS tip                                                                                  | Acceptance 11, 12                                                              |
+| M9  | `/deploy`: systemd, Nginx, env, deploy script, DEPLOY.md                                                                                                                   | Written down step by step                                                      |
+| M10 | Polish pass at 320/390/768/1280, light/dark, keyboard only, reduced motion                                                                                                 | Acceptance 13                                                                  |
 
 ## File tree (target)
 

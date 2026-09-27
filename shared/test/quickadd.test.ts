@@ -59,7 +59,10 @@ describe('parseQuickAdd', () => {
   });
 
   it('ignores deleted lists', () => {
-    const r = parseQuickAdd('x @old', { lists: [{ ...list('l_old', 'Old'), deleted: true }], today });
+    const r = parseQuickAdd('x @old', {
+      lists: [{ ...list('l_old', 'Old'), deleted: true }],
+      today,
+    });
     expect(r.newListName).toBe('old');
   });
 
@@ -73,7 +76,12 @@ describe('parseQuickAdd', () => {
 
   it('parses waiting-on as Delegate', () => {
     const r = parse('Contract review >Ada');
-    expect(r).toMatchObject({ waitingOn: 'Ada', important: false, urgentFlag: true, title: 'Contract review' });
+    expect(r).toMatchObject({
+      waitingOn: 'Ada',
+      important: false,
+      urgentFlag: true,
+      title: 'Contract review',
+    });
     expect(quadrantOf(r, { today, urgencyWindowDays: 2 })).toBe('delegate');
   });
 

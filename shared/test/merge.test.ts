@@ -74,7 +74,11 @@ describe('mergeTask: two devices offline', () => {
     const base = task();
     const a = addSubtask(base, 'From A', at(1)).task;
     const b = addSubtask(base, 'From B', at(2)).task;
-    expect(merge(a, b).subtasks.map((s) => s.title).sort()).toEqual(['From A', 'From B']);
+    expect(
+      merge(a, b)
+        .subtasks.map((s) => s.title)
+        .sort(),
+    ).toEqual(['From A', 'From B']);
   });
 
   it('merges the same step by its own updatedAt', () => {
@@ -87,7 +91,15 @@ describe('mergeTask: two devices offline', () => {
 
   it('keeps a deleted step deleted', () => {
     const { t: base, ids } = withSteps(task(), 'Step');
-    const a = { ...base, subtasks: base.subtasks.map((s) => ({ ...s, deleted: true, deletedAt: at(1), updatedAt: at(1) })) };
+    const a = {
+      ...base,
+      subtasks: base.subtasks.map((s) => ({
+        ...s,
+        deleted: true,
+        deletedAt: at(1),
+        updatedAt: at(1),
+      })),
+    };
     const b = updateSubtask(base, ids[0]!, { title: 'Edited later' }, at(9));
     expect(merge(a, b).subtasks[0]?.deleted).toBe(true);
   });

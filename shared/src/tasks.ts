@@ -139,7 +139,12 @@ export function restoreTask(task: Task, now: string): Task {
   return { ...rest, deleted: false, restore: true, updatedAt: now };
 }
 
-export function moveToQuadrant(task: Task, target: Quadrant, now: string, ctx: UrgencyContext): Task {
+export function moveToQuadrant(
+  task: Task,
+  target: Quadrant,
+  now: string,
+  ctx: UrgencyContext,
+): Task {
   const from = quadrantOf(task, ctx);
   const moved = patchTask(task, flagsForQuadrant(target), now);
   const to = quadrantOf(moved, ctx);
@@ -153,7 +158,13 @@ export function dropTask(task: Task, now: string, ctx: UrgencyContext): Task {
   return from === 'drop' ? dropped : logEvent(dropped, 'movedQuadrant', now, { from, to: 'drop' });
 }
 
-export function postponeTask(task: Task, from: DateStr, to: DateStr, setDue: boolean, now: string): Task {
+export function postponeTask(
+  task: Task,
+  from: DateStr,
+  to: DateStr,
+  setDue: boolean,
+  now: string,
+): Task {
   const moved = setDue ? patchTask(task, { due: to }, now) : task;
   return logEvent(moved, 'postponed', now, { from, to });
 }
@@ -180,7 +191,11 @@ function withSubtasks(task: Task, subtasks: Subtask[]): Task {
   return { ...task, subtasks };
 }
 
-export function addSubtask(task: Task, title: string, now: string): { task: Task; subtask: Subtask } {
+export function addSubtask(
+  task: Task,
+  title: string,
+  now: string,
+): { task: Task; subtask: Subtask } {
   const steps = liveSubtasks(task);
   const last = steps[steps.length - 1];
   const subtask: Subtask = {
@@ -214,7 +229,9 @@ export function updateSubtask(
 export function removeSubtask(task: Task, id: string, now: string): Task {
   return withSubtasks(
     task,
-    task.subtasks.map((s) => (s.id === id ? { ...s, deleted: true, deletedAt: now, updatedAt: now } : s)),
+    task.subtasks.map((s) =>
+      s.id === id ? { ...s, deleted: true, deletedAt: now, updatedAt: now } : s,
+    ),
   );
 }
 
@@ -231,7 +248,11 @@ export function reorderSubtasks(task: Task, orderedIds: string[], now: string): 
 }
 
 /** Turns a step into its own task in the same list; the step is removed. */
-export function promoteSubtask(task: Task, id: string, now: string): { task: Task; promoted: Task } | null {
+export function promoteSubtask(
+  task: Task,
+  id: string,
+  now: string,
+): { task: Task; promoted: Task } | null {
   const step = task.subtasks.find((s) => s.id === id && !s.deleted);
   if (!step) return null;
   const promoted = newTask({ title: step.title, listId: task.listId }, now);

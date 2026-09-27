@@ -60,7 +60,12 @@ describe('rankTasks and suggestFrog', () => {
   });
 
   it('suggests the highest-scoring important task as Frog', () => {
-    const delegate = task({ title: 'delegate', important: false, urgentFlag: true, due: '2026-09-20' });
+    const delegate = task({
+      title: 'delegate',
+      important: false,
+      urgentFlag: true,
+      due: '2026-09-20',
+    });
     const schedule = task({ title: 'schedule' });
     expect(suggestFrog([delegate, schedule], ctx)?.title).toBe('schedule');
     expect(suggestFrog([delegate], ctx)).toBeNull();

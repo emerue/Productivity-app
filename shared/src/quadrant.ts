@@ -34,7 +34,10 @@ export function isOverdue(task: Pick<Task, 'due'>, today: DateStr): boolean {
 }
 
 /** Derived, never stored. */
-export function quadrantOf(task: UrgencyFields & Pick<Task, 'important'>, ctx: UrgencyContext): Quadrant {
+export function quadrantOf(
+  task: UrgencyFields & Pick<Task, 'important'>,
+  ctx: UrgencyContext,
+): Quadrant {
   const urgent = isUrgent(task, ctx);
   if (task.important) return urgent ? 'do' : 'schedule';
   return urgent ? 'delegate' : 'drop';
@@ -58,6 +61,10 @@ export function flagsForQuadrant(q: Quadrant): Pick<Task, 'important' | 'urgentF
  * Moving to Schedule or Drop cannot take effect while the due date keeps the
  * task urgent. The UI asks whether to change the due date.
  */
-export function dueConflict(task: Pick<Task, 'due'>, target: Quadrant, ctx: UrgencyContext): boolean {
+export function dueConflict(
+  task: Pick<Task, 'due'>,
+  target: Quadrant,
+  ctx: UrgencyContext,
+): boolean {
   return (target === 'schedule' || target === 'drop') && isDueUrgent(task, ctx);
 }

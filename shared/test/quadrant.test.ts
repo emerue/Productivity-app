@@ -1,11 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  dueConflict,
-  flagsForQuadrant,
-  isUrgent,
-  quadrantOf,
-  QUADRANTS,
-} from '../src/quadrant.js';
+import { dueConflict, flagsForQuadrant, isUrgent, quadrantOf, QUADRANTS } from '../src/quadrant.js';
 import { moveToQuadrant, newTask } from '../src/tasks.js';
 import { T0, task } from './helpers.js';
 

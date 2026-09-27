@@ -15,7 +15,7 @@ Small calls made while building. The brief's settled decisions are not repeated 
 
 - **`restore: true` marker** is an optional field on `List` and `Task`. Subtasks also get an optional `deletedAt` so the nightly purge can age them out.
 - **`Store.epoch`** (random string) was added next to `schemaVersion`. An import replaces the store and changes the epoch. A client that syncs with an old epoch gets `409` and reloads the full store instead of merging stale data back in. Without this, "import replaces" would be undone by the next device that syncs.
-- **Frog vs My Day.** `days[date].frog` holds the Frog. `days[date].myDay` holds the *other* planned tasks, in order. The frog id never appears in `myDay`. The "full day" hint counts `frog + myDay.length`. Making a new Frog when one exists moves the old one to the top of `myDay`.
+- **Frog vs My Day.** `days[date].frog` holds the Frog. `days[date].myDay` holds the _other_ planned tasks, in order. The frog id never appears in `myDay`. The "full day" hint counts `frog + myDay.length`. Making a new Frog when one exists moves the old one to the top of `myDay`.
 - **Carry forward logs `postponed`.** In evening planning, "Tomorrow" logs `postponed { from: today, to: tomorrow }`. Without this, a Frog that is carried forward night after night would never count as "keeps slipping". "Pick a date" logs `postponed { from: previous due or today, to: date }`.
 - **Undo of completion** reopens the task and appends `reopened` (history is append-only). Undo of delete is an explicit restore (`deleted: false, restore: true`).
 - **Merge tie-break.** When two versions have the same `updatedAt` but different content, the one whose JSON sorts later wins. This makes merge commutative, so the server and every client converge.
@@ -24,7 +24,7 @@ Small calls made while building. The brief's settled decisions are not repeated 
 
 ## Dates and parsing
 
-- **Weekday tokens** (`^mon`…`^sun`) mean the next occurrence *after* today. Typing today's weekday gives next week; use `^today` for today. Full names (`^thursday`) also work.
+- **Weekday tokens** (`^mon`…`^sun`) mean the next occurrence _after_ today. Typing today's weekday gives next week; use `^today` for today. Full names (`^thursday`) also work.
 - **Day/month without a year** (`^12oct`, `^12/10`) resolves to whichever of last year, this year, or next year is closest to today. In December, `^5/1` means next January. On 27 Sep, `^12/9` means 12 Sep this year and shows as overdue.
 - **`^tom`** also accepts `^tomorrow`.
 - **"Due today, not planned"** includes overdue open tasks as well as tasks due today. Otherwise overdue tasks outside My Day would be invisible on the main screen.

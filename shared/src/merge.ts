@@ -30,7 +30,9 @@ export function stableStringify(value: unknown): string {
     if (key === 'rev') return undefined;
     if (v && typeof v === 'object' && !Array.isArray(v)) {
       return Object.fromEntries(
-        Object.entries(v as Record<string, unknown>).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)),
+        Object.entries(v as Record<string, unknown>).sort(([a], [b]) =>
+          a < b ? -1 : a > b ? 1 : 0,
+        ),
       );
     }
     return v;
@@ -68,7 +70,11 @@ function resolveTombstone<T extends Tombstoned>(a: T, b: T, merged: T): T {
   const bDel = b.deleted === true;
 
   if (aDel && bDel) {
-    return { ...base, deleted: true, deletedAt: earlier(a.deletedAt, b.deletedAt) ?? merged.updatedAt } as T;
+    return {
+      ...base,
+      deleted: true,
+      deletedAt: earlier(a.deletedAt, b.deletedAt) ?? merged.updatedAt,
+    } as T;
   }
   if (!aDel && !bDel) {
     // Keep the restore marker sticky so a stale tombstone can't win later.
@@ -91,7 +97,10 @@ export function mergeList(a: List, b: List): List {
 export function mergeSubtask(a: Subtask, b: Subtask): Subtask {
   const winner = pickNewer(a, b, a.updatedAt, b.updatedAt);
   if (a.deleted || b.deleted) {
-    const deletedAt = earlier(a.deleted ? a.deletedAt : undefined, b.deleted ? b.deletedAt : undefined);
+    const deletedAt = earlier(
+      a.deleted ? a.deletedAt : undefined,
+      b.deleted ? b.deletedAt : undefined,
+    );
     return { ...winner, deleted: true, deletedAt: deletedAt ?? winner.updatedAt };
   }
   return winner;
@@ -125,7 +134,13 @@ export function mergeTask(a: Task, b: Task): Task {
   const ta = ts(a.updatedAt);
   const tb = ts(b.updatedAt);
   const scalar =
-    ta !== tb ? (ta > tb ? a : b) : stableStringify(scalarPart(a)) >= stableStringify(scalarPart(b)) ? a : b;
+    ta !== tb
+      ? ta > tb
+        ? a
+        : b
+      : stableStringify(scalarPart(a)) >= stableStringify(scalarPart(b))
+        ? a
+        : b;
   const notesSide = pickNewer(
     { notes: a.notes, notesUpdatedAt: a.notesUpdatedAt },
     { notes: b.notes, notesUpdatedAt: b.notesUpdatedAt },
@@ -260,7 +275,10 @@ export function clampFuture<T>(value: T, now: Date): T {
     if (v && typeof v === 'object') {
       const out: Record<string, unknown> = {};
       for (const [k, x] of Object.entries(v as Record<string, unknown>)) {
-        out[k] = TIMESTAMP_KEYS.has(k) && typeof x === 'string' && Date.parse(x) > limit ? nowIso : walk(x);
+        out[k] =
+          TIMESTAMP_KEYS.has(k) && typeof x === 'string' && Date.parse(x) > limit
+            ? nowIso
+            : walk(x);
       }
       return out;
     }

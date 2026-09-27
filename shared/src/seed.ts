@@ -1,4 +1,9 @@
-import { DEFAULT_LIST_NAME, DEFAULT_LIST_NAMES, DEFAULT_SETTINGS, SCHEMA_VERSION } from './constants.js';
+import {
+  DEFAULT_LIST_NAME,
+  DEFAULT_LIST_NAMES,
+  DEFAULT_SETTINGS,
+  SCHEMA_VERSION,
+} from './constants.js';
 import { newEpoch } from './ids.js';
 import type { List, Settings, Store } from './schema.js';
 import { newList } from './tasks.js';
