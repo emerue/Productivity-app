@@ -8,6 +8,7 @@ import './styles/components.css';
 import './styles/tasks.css';
 import './styles/views.css';
 import './styles/focus.css';
+import './styles/plan.css';
 import './styles/screens.css';
 
 applyStoredTheme();

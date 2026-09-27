@@ -123,7 +123,7 @@ export function MyDayScreen() {
         />
       </header>
       <QuickAddInline />
-      <PlanBanner today={today} dayPlanned={day.planned} hasAnything={hasAnything} />
+      <PlanBanner today={today} />
 
       {!hasAnything && (
         <div className="empty-state">
