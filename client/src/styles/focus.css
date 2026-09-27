@@ -1,0 +1,189 @@
+/* ---------------------------------------------------------------------------
+   Focus Mode: full screen, surface, nothing but the task and the timer
+   ------------------------------------------------------------------------ */
+
+.focus {
+  min-height: 100dvh;
+  padding: var(--safe-top) var(--gutter) calc(40px + var(--safe-bottom));
+  background: var(--surface);
+}
+
+.focus__bar {
+  display: flex;
+  align-items: center;
+  height: 56px;
+  margin-left: -12px;
+}
+
+.focus__exit {
+  color: var(--ink-2);
+}
+
+.focus__col {
+  max-width: 560px;
+  margin: 0 auto;
+  padding-top: 8px;
+}
+
+.focus__task {
+  color: var(--ink-2);
+  font-size: var(--fs-section);
+  font-weight: 500;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.focus__next {
+  margin-top: 8px;
+  color: var(--ink);
+  font-size: var(--fs-frog);
+  font-weight: 600;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.focus__timer-block,
+.focus__end {
+  margin-top: 40px;
+}
+
+.focus__timer {
+  color: var(--ink-2);
+  font-size: var(--fs-timer);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  transition: color 200ms ease-out;
+}
+
+.focus[data-phase='running'] .focus__timer {
+  color: var(--frog);
+}
+
+.focus[data-phase='paused'] .focus__timer {
+  color: var(--ink-3);
+}
+
+.focus__progress {
+  height: 2px;
+  margin-top: 16px;
+  overflow: hidden;
+  background: var(--line);
+}
+
+.focus__progress span {
+  display: block;
+  height: 100%;
+  background: var(--frog);
+  transform-origin: left center;
+  transition: transform 250ms linear;
+}
+
+.focus__presets {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.focus__preset {
+  min-height: 52px;
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-btn);
+  color: var(--ink-2);
+  font-size: var(--fs-row);
+  line-height: 1.2;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.focus__preset[aria-checked='true'] {
+  border-color: var(--ink);
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.focus__go {
+  margin-top: 12px;
+}
+
+.focus__controls {
+  display: flex;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.focus__controls .btn {
+  flex: 1;
+}
+
+.focus__end-title {
+  font-size: var(--fs-section);
+  font-weight: 600;
+}
+
+.focus__end-actions {
+  display: grid;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.focus__steps {
+  margin: 40px 0 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+  list-style: none;
+}
+
+.focus__step {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-height: 48px;
+  border-bottom: 1px solid var(--line);
+}
+
+.focus__step[data-done] span {
+  color: var(--ink-3);
+}
+
+.focus__notes {
+  margin-top: 16px;
+}
+
+.focus__notes summary {
+  display: flex;
+  align-items: center;
+  min-height: var(--hit);
+  color: var(--ink-2);
+  font-weight: 500;
+  cursor: pointer;
+  list-style: none;
+}
+
+.focus__notes summary::-webkit-details-marker {
+  display: none;
+}
+
+.focus__notes summary::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  margin-left: 10px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 160ms ease-out;
+}
+
+.focus__notes[open] summary::after {
+  transform: rotate(45deg);
+}
+
+.focus__notes .notes {
+  margin-top: 0;
+  padding-top: 4px;
+  border-top: 0;
+}
