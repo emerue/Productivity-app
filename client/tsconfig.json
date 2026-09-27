@@ -1,0 +1,14 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "types": ["vite/client", "vite-plugin-pwa/client"],
+    "paths": { "@frog/shared": ["../shared/src/index.ts"] }
+  },
+  "include": ["src", "test", "vite.config.ts"],
+  "exclude": ["src/sw.ts"]
+}
