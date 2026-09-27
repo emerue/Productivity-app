@@ -48,6 +48,12 @@ Small calls made while building. The brief's settled decisions are not repeated 
 - **Non-Start emphasis uses ink, not green.** Green is reserved for Frog UI, Start, the running timer and focus rings. Actions that need weight but aren't Start (Sign in, a dialog's confirm, planning's Next/Finish) use `btn--ink`: `--ink` fill with `--paper` text, the same pair as toasts.
 - **`--ink-3` contrast (not changed, flagged).** Dimmed tasks use `--ink-3` as the brief specifies. On `--paper` that is about 2.5:1 in light mode and 3.7:1 in dark mode, below AA for body text. The tokens are kept as written because dimming is a deliberate de-emphasis and the text is still readable. If strict AA matters more, darken `--ink-3` to about `#79827D` (light).
 
+- **Matrix cells are separated by hairlines, not drawn as four cards**, to avoid "identical rounded cards for everything". The mobile overview uses the same hairline 2×2.
+- **Empty copy for Schedule, Delegate and Drop** (the brief only gives Do): "Nothing scheduled.", "Nobody to wait on.", "Nothing to drop."
+- **Ordering inside quadrants and lists** uses the suggestion score for today (then due date, then age), so the most pressing task is always on top without a separate sort setting.
+- **Due-date conflict** is a small dialog (bottom sheet on mobile) with a date field, "Change date" and "Keep as is". The move itself is applied at once (flags set), so "Keep as is" just leaves the task in Do until the date moves out of the window.
+- **Swipe actions** are Start (green, it is a Start action), Move to and My Day, on ink.
+
 ## Proposed (not built)
 
 (Features that seem missing from the brief. Listed here, not built.)

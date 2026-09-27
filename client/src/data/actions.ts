@@ -462,4 +462,3 @@ export function finishPlan(date: DateStr, frog: string | null, myDay: string[]):
   };
   commit({ days: [day], tasks });
 }
-

@@ -61,6 +61,12 @@ export function formatDue(date: DateStr, today: DateStr): string {
   return sameYear ? `${d} ${MONTH[m - 1]}` : `${d} ${MONTH[m - 1]} ${y}`;
 }
 
+/** `formatDue` for use mid-sentence: "due tomorrow", "due Thu". */
+export function formatDueInline(date: DateStr, today: DateStr): string {
+  const label = formatDue(date, today);
+  return ['Today', 'Tomorrow', 'Yesterday'].includes(label) ? label.toLowerCase() : label;
+}
+
 /** Longer form for chips and prompts: "Thu 1 Oct". */
 export function formatDateLong(date: DateStr, today: DateStr): string {
   const delta = diffDays(date, today);

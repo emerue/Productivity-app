@@ -24,7 +24,9 @@ export function Sheet({ label, onClose, children, size = 'tall' }: SheetProps) {
 
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
-    panelRef.current?.focus({ preventScroll: true });
+    // Leave focus alone if content already focused a field (e.g. "Waiting on").
+    if (!panelRef.current?.contains(document.activeElement))
+      panelRef.current?.focus({ preventScroll: true });
     const { overflow } = document.body.style;
     document.body.style.overflow = 'hidden';
     const onKey = (e: KeyboardEvent) => {
