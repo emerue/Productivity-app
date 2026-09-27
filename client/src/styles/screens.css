@@ -1,1 +1,89 @@
 /* Screen-specific styles. */
+
+.screen {
+  padding-bottom: 24px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 24px 0;
+  color: var(--ink-2);
+}
+
+/* ---------------------------------------------------------------------------
+   My Day
+   ------------------------------------------------------------------------ */
+
+.my-day .frog-slot,
+.my-day .frog-done,
+.my-day .pick-frog {
+  margin-bottom: 12px;
+}
+
+.my-day__hint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  padding-top: 12px;
+}
+
+.due-unplanned {
+  margin-top: 16px;
+}
+
+.due-unplanned__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 48px;
+  color: var(--ink-2);
+  font-size: var(--fs-row);
+}
+
+.due-unplanned__chevron {
+  transition: transform 160ms ease-out;
+}
+
+.due-unplanned__toggle[aria-expanded='true'] .due-unplanned__chevron {
+  transform: rotate(90deg);
+}
+
+.due-unplanned__list {
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+  list-style: none;
+}
+
+.due-unplanned__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 56px;
+  border-bottom: 1px solid var(--line);
+}
+
+.due-unplanned__main {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  min-height: var(--hit);
+}
+
+.due-unplanned__main .row__due {
+  flex: none;
+  color: var(--ink-2);
+  font-size: var(--fs-meta);
+}
+
+.due-unplanned__main .row__due.is-overdue {
+  color: var(--danger);
+}

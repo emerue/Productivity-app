@@ -5,6 +5,7 @@ import { applyStoredTheme } from './lib/theme';
 import './styles/tokens.css';
 import './styles/base.css';
 import './styles/components.css';
+import './styles/tasks.css';
 import './styles/screens.css';
 
 applyStoredTheme();
