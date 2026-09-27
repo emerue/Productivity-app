@@ -42,6 +42,12 @@ Small calls made while building. The brief's settled decisions are not repeated 
 - **Task detail** is addressed by `?task=<id>` on the current route, so it overlays any screen and survives reload.
 - **Sign out** warns when the outbox has unsynced changes, then clears local data on that device.
 
+## Design system
+
+- **Text on green in dark mode.** The brief says primary buttons have white text on `--frog`. In dark mode `--frog` is `#6FBF93`, and white on it is about 2:1, which fails AA. `--on-frog` is white in light mode and `#0F1A14` in dark mode. `--on-danger` follows the same rule.
+- **Non-Start emphasis uses ink, not green.** Green is reserved for Frog UI, Start, the running timer and focus rings. Actions that need weight but aren't Start (Sign in, a dialog's confirm, planning's Next/Finish) use `btn--ink`: `--ink` fill with `--paper` text, the same pair as toasts.
+- **`--ink-3` contrast (not changed, flagged).** Dimmed tasks use `--ink-3` as the brief specifies. On `--paper` that is about 2.5:1 in light mode and 3.7:1 in dark mode, below AA for body text. The tokens are kept as written because dimming is a deliberate de-emphasis and the text is still readable. If strict AA matters more, darken `--ink-3` to about `#79827D` (light).
+
 ## Proposed (not built)
 
 (Features that seem missing from the brief. Listed here, not built.)

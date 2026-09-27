@@ -1,0 +1,154 @@
+/* Schibsted Grotesk, self-hosted (OFL). Latin + Latin Extended, 400/500/600. */
+@font-face {
+  font-family: 'Schibsted Grotesk';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/schibsted-grotesk-latin-400-normal.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Schibsted Grotesk';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/schibsted-grotesk-latin-500-normal.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Schibsted Grotesk';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/schibsted-grotesk-latin-600-normal.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Schibsted Grotesk';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/schibsted-grotesk-latin-ext-400-normal.woff2') format('woff2');
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F,
+    U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Schibsted Grotesk';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/schibsted-grotesk-latin-ext-500-normal.woff2') format('woff2');
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F,
+    U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Schibsted Grotesk';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/schibsted-grotesk-latin-ext-600-normal.woff2') format('woff2');
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F,
+    U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+:root {
+  color-scheme: light;
+  --paper: #f5f6f3;
+  --surface: #ffffff;
+  --ink: #1d2420;
+  --ink-2: #5e6863;
+  --ink-3: #98a19c;
+  --line: #e1e5e0;
+  --frog: #2e6a4c;
+  --frog-tint: #e6efe9;
+  --on-frog: #ffffff;
+  --q-do: #a13d36;
+  --q-schedule: #3b5b8a;
+  --q-delegate: #8c6a1c;
+  --q-drop: #7d8480;
+  --danger: #a13d36;
+  --on-danger: #ffffff;
+  --scrim: rgb(29 36 32 / 0.32);
+
+  --font: 'Schibsted Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --fs-meta: 0.8125rem;
+  --fs-row: 0.9375rem;
+  --fs-body: 1rem;
+  --fs-section: 1.25rem;
+  --fs-frog: 1.625rem;
+  --fs-timer: 4.5rem;
+
+  --radius-card: 16px;
+  --radius-btn: 10px;
+  --hit: 44px;
+  --gutter: 16px;
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --t-sheet: 220ms;
+
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --tabbar-h: 56px;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --gutter: 24px;
+  }
+}
+
+@media (max-width: 379px) {
+  :root {
+    --fs-timer: 3.5rem;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --paper: #121614;
+    --surface: #1a1f1c;
+    --ink: #e7ebe8;
+    --ink-2: #a3ada7;
+    --ink-3: #6b746f;
+    --line: #29302c;
+    --frog: #6fbf93;
+    --frog-tint: #1c2b23;
+    --on-frog: #0f1a14;
+    --q-do: #e07a70;
+    --q-schedule: #86a6d6;
+    --q-delegate: #d2ae5e;
+    --q-drop: #8e9591;
+    --danger: #e07a70;
+    --on-danger: #1f0d0b;
+    --scrim: rgb(0 0 0 / 0.5);
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --paper: #121614;
+  --surface: #1a1f1c;
+  --ink: #e7ebe8;
+  --ink-2: #a3ada7;
+  --ink-3: #6b746f;
+  --line: #29302c;
+  --frog: #6fbf93;
+  --frog-tint: #1c2b23;
+  --on-frog: #0f1a14;
+  --q-do: #e07a70;
+  --q-schedule: #86a6d6;
+  --q-delegate: #d2ae5e;
+  --q-drop: #8e9591;
+  --danger: #e07a70;
+  --on-danger: #1f0d0b;
+  --scrim: rgb(0 0 0 / 0.5);
+}
