@@ -50,14 +50,18 @@ ensure_base() {
 
   if [ ! -f "$ENV_FILE" ]; then
     say "Creating $ENV_FILE (session secret generated, password not set yet)"
-    umask 077
-    cat >"$ENV_FILE" <<EOF
+    # Subshell: a bare umask 077 would leak into the release steps and leave
+    # the release unreadable by the frog user (systemd CHDIR failure).
+    (
+      umask 077
+      cat >"$ENV_FILE" <<EOF
 PORT=3080
 DATA_DIR=$DATA
 TZ=Africa/Lagos
 SESSION_SECRET=$(openssl rand -base64 48 | tr -d '\n')
 PASSWORD_HASH=
 EOF
+    )
   fi
   chown root:root "$ENV_FILE"
   chmod 600 "$ENV_FILE"
@@ -131,6 +135,9 @@ release() {
 
   say "Installing runtime dependencies (no build on this server)"
   (cd "$dir" && npm ci --omit=dev -w server --no-audit --no-fund --loglevel=error)
+  # frog must be able to read the code; only root may change it.
+  chown -R root:root "$dir"
+  chmod -R u+rwX,go+rX,go-w "$dir"
 
   if ! cmp -s "$dir/deploy/frog.service" /etc/systemd/system/frog.service; then
     say "Installing systemd unit"
