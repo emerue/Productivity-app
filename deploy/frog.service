@@ -1,0 +1,44 @@
+[Unit]
+Description=Frog (personal execution system)
+After=network-online.target
+Wants=network-online.target
+# Stop retrying after 5 failures in a minute (e.g. no password set yet).
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=frog
+Group=frog
+WorkingDirectory=/srv/frog/app
+EnvironmentFile=/srv/frog/.env
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node server/dist/index.js
+Restart=always
+RestartSec=3
+
+# Graceful stop: SIGTERM lets the write queue flush store.json before exit.
+KillSignal=SIGTERM
+TimeoutStopSec=20
+
+# Data files are created mode 600.
+UMask=0077
+
+# Shared 1 GB box: keep Frog well away from the bots' memory.
+MemoryHigh=200M
+MemoryMax=300M
+
+# Hardening. The app only needs to write its data directory.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/srv/frog/data
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+
+[Install]
+WantedBy=multi-user.target

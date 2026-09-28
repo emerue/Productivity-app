@@ -54,6 +54,17 @@ Small calls made while building. The brief's settled decisions are not repeated 
 - **Due-date conflict** is a small dialog (bottom sheet on mobile) with a date field, "Change date" and "Keep as is". The move itself is applied at once (flags set), so "Keep as is" just leaves the task in Do until the date moves out of the window.
 - **Swipe actions** are Start (green, it is a Start action), Move to and My Day, on ink.
 
+## Deployment
+
+- **Build on the laptop, not the server (changes the brief's `deploy.sh`).** The brief's script pulls and builds on the VPS. The VPS is a shared 1 vCPU / 1 GB box, and the Vite build can briefly need hundreds of MB. So `deploy.sh` builds, typechecks and tests locally, then uploads a ~400 KB release. The server runs `npm ci --omit=dev -w server` (77 runtime packages) and restarts. Measured runtime use is about 70 MB. The systemd unit caps Frog at `MemoryMax=300M` so it can't squeeze the other services.
+- **No git clone on the server.** Releases are unpacked into `/srv/frog/releases/<utc-stamp>-<commit>` and `/srv/frog/app` is an atomic symlink switch. The last 5 are kept. A failed health check rolls back automatically. The server needs no GitHub credentials.
+- **One script, several actions.** `deploy.sh` (release, password, status, rollback, tunnel, https, backup) runs on the laptop and sends `remote.sh` over SSH. Both are idempotent, so there is no separate server-setup script.
+- **Password never leaves the laptop.** `deploy.sh password` hashes locally and sends only the bcrypt hash.
+- **Server address is not committed.** `FROG_HOST` lives in the git-ignored `deploy/deploy.env`.
+- **Certificates** use `certbot certonly --nginx`, and then the full site from `nginx.conf.template` is enabled only if `nginx -t` passes. The template uses `listen 443 ssl http2` because Ubuntu 24.04 ships Nginx 1.24 (`http2 on;` needs 1.25.1).
+- **Before a domain exists:** `deploy.sh tunnel` uses Frog at `http://localhost:3080` over SSH. Frog is not exposed on the bare IP over plain HTTP, because the session cookie is `Secure` and the password would cross the network unencrypted.
+- **Off-server backups** use `scp` (`deploy.sh backup`) because Git Bash on Windows has no rsync. The brief's rsync command is in DEPLOY.md for macOS, Linux and WSL.
+
 ## Proposed (not built)
 
 (Features that seem missing from the brief. Listed here, not built.)

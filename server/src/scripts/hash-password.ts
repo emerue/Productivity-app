@@ -2,6 +2,7 @@
  * Prints a bcrypt hash for PASSWORD_HASH.
  *   npm run hash-password            (prompts, input hidden)
  *   echo -n 'secret' | npm run hash-password --silent
+ * Prompts go to stderr, so stdout carries only the PASSWORD_HASH line.
  */
 import bcrypt from 'bcrypt';
 import { createInterface } from 'node:readline';
@@ -14,7 +15,7 @@ async function readHidden(prompt: string): Promise<string> {
       .toString('utf8')
       .replace(/\r?\n$/, '');
   }
-  const rl = createInterface({ input: process.stdin, output: process.stdout, terminal: true });
+  const rl = createInterface({ input: process.stdin, output: process.stderr, terminal: true });
   const out = rl as unknown as { _writeToOutput: (s: string) => void; output: NodeJS.WriteStream };
   let muted = false;
   out._writeToOutput = (s) => {
@@ -23,7 +24,7 @@ async function readHidden(prompt: string): Promise<string> {
   return new Promise((resolve) => {
     rl.question(prompt, (answer) => {
       rl.close();
-      process.stdout.write('\n');
+      process.stderr.write('\n');
       resolve(answer);
     });
     muted = true;
