@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14.08" fill="#2E6A4C"/>
+  <g transform="translate(5.546666666666667 5.326222222222224) scale(2.2044444444444444)">
+  
+  <defs>
+    <mask id="frog-mask">
+      <rect width="24" height="24" fill="#fff"/>
+      <circle cx="7.6" cy="7.4" r="1.35" fill="#000"/>
+      <circle cx="16.4" cy="7.4" r="1.35" fill="#000"/>
+      <path d="M8.4 14.2c1.05.95 2.25 1.4 3.6 1.4s2.55-.45 3.6-1.4" fill="none" stroke="#000" stroke-width="1.4" stroke-linecap="round"/>
+    </mask>
+  </defs>
+  <g mask="url(#frog-mask)" fill="#F5F6F3">
+    <circle cx="7.6" cy="7.4" r="3.4"/>
+    <circle cx="16.4" cy="7.4" r="3.4"/>
+    <ellipse cx="12" cy="13.8" rx="9" ry="6.4"/>
+  </g>
+</g>
+</svg>

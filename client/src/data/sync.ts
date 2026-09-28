@@ -234,7 +234,7 @@ async function loadFromServer(): Promise<void> {
 }
 
 /** The server store was replaced (import). Local data is replaced to match. */
-async function reloadFromServer(): Promise<void> {
+export async function reloadFromServer(): Promise<void> {
   try {
     await loadFromServer();
   } catch (err) {
