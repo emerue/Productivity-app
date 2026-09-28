@@ -87,3 +87,7 @@
 .due-unplanned__main .row__due.is-overdue {
   color: var(--danger);
 }
+
+.due-unplanned__all {
+  margin-top: 4px;
+}

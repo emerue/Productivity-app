@@ -161,3 +161,12 @@ export function ListIcon({ size = 22, className }: IconProps) {
     </svg>
   );
 }
+
+export function CalendarIcon({ size = 22, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className}>
+      <rect x="4" y="5.5" width="16" height="14.5" rx="2.5" {...stroke} />
+      <path d="M4 10h16M8.5 3.5v4M15.5 3.5v4" {...stroke} />
+    </svg>
+  );
+}

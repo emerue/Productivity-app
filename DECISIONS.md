@@ -52,7 +52,7 @@ Small calls made while building. The brief's settled decisions are not repeated 
 - **Empty copy for Schedule, Delegate and Drop** (the brief only gives Do): "Nothing scheduled.", "Nobody to wait on.", "Nothing to drop."
 - **Ordering inside quadrants and lists** uses the suggestion score for today (then due date, then age), so the most pressing task is always on top without a separate sort setting.
 - **Due-date conflict** is a small dialog (bottom sheet on mobile) with a date field, "Change date" and "Keep as is". The move itself is applied at once (flags set), so "Keep as is" just leaves the task in Do until the date moves out of the window.
-- **Swipe actions** are Start (green, it is a Start action), Move to and My Day, on ink.
+- **Swipe actions** are Start (green, it is a Start action), My Day and More (opens the task actions sheet, which includes Change quadrant), on ink.
 
 ## Deployment
 
@@ -64,6 +64,14 @@ Small calls made while building. The brief's settled decisions are not repeated 
 - **Certificates** use `certbot certonly --nginx`, and then the full site from `nginx.conf.template` is enabled only if `nginx -t` passes. The template uses `listen 443 ssl http2` because Ubuntu 24.04 ships Nginx 1.24 (`http2 on;` needs 1.25.1).
 - **Before a domain exists:** `deploy.sh tunnel` uses Frog at `http://localhost:3080` over SSH. Frog is not exposed on the bare IP over plain HTTP, because the session cookie is `Secure` and the password would cross the network unencrypted.
 - **Off-server backups** use `scp` (`deploy.sh backup`) because Git Bash on Windows has no rsync. The brief's rsync command is in DEPLOY.md for macOS, Linux and WSL.
+
+## After launch (feedback)
+
+- **Quick add follows the screen.** Tasks used to land in the default list (Personal) unless `@list` was typed, even when adding from inside another list. Now the defaults come from the screen: a list view adds to that list, My Day adds to My Day, and the Agenda's day view sets that day as the due date. A list picker (and a My Day toggle on My Day) sits under the input so the destination is always visible and can be changed; `@list`, `+` and `^date` still override it. The Settings default list applies everywhere else.
+- **Row actions (⋯).** Every task row has a ⋯ button that opens one sheet: Edit details, Add to / Remove from My Day, Change quadrant, Due date, Move to list and Delete (undo via toast). Moving to another list also has undo. On desktop, `E` opens it for the selected task and `Delete`/`Backspace` deletes it (with undo).
+- **Agenda (Day / Week).** A fourth tab. Each day lists tasks due that day, tasks planned into that day's My Day (Frog first) and Delegate follow-ups; open before done. Overdue open tasks show on top while today is in range. Weeks start on Monday. Rows show their list name because rows from every list mix here. Range and date live in the URL (`/agenda?view=week&date=…`).
+
+- **Borrowed from Microsoft To Do.** Rows show their list name wherever lists mix (My Day, Matrix, Agenda, search, Completed). The sidebar shows open counts for My Day and each list. My Day has a collapsible "Completed" section and "From earlier days": open tasks from the last 14 days' My Days that aren't in today's (tasks already due show under "Due today, not planned" instead), each with Add to My Day, plus Add all. Not borrowed: a star on each row (in Frog, importance decides the quadrant and most tasks are important, so the star would be on almost everything), background images, shared lists, assigned-to-me and flagged email (single user, no Outlook).
 
 ## Proposed (not built)
 

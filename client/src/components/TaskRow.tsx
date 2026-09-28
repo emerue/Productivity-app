@@ -16,7 +16,7 @@ import { taskSubtitle } from '../lib/format';
 import { useTaskDetail } from '../lib/hooks';
 import { formatDue } from '../lib/time';
 import { CheckCircle } from './CheckCircle';
-import { NoteIcon, PlayIcon } from './Icons';
+import { MoreIcon, NoteIcon, PlayIcon } from './Icons';
 
 interface TaskRowProps {
   task: Task;
@@ -26,17 +26,27 @@ interface TaskRowProps {
   edge?: boolean;
   /** Hide the "My Day" swipe action (already in My Day). */
   inMyDay?: boolean;
+  /** Show the task's list name (Agenda, where rows from every list mix). */
+  showList?: boolean;
 }
 
 const REVEAL_WIDTH = 216;
 const COMPLETE_AT = 96;
 
-export const TaskRow = memo(function TaskRow({ task, today, dimmed, edge, inMyDay }: TaskRowProps) {
+export const TaskRow = memo(function TaskRow({
+  task,
+  today,
+  dimmed,
+  edge,
+  inMyDay,
+  showList,
+}: TaskRowProps) {
   const navigate = useNavigate();
   const { openTask } = useTaskDetail();
   const urgencyWindowDays = useData((s) => s.settings.urgencyWindowDays);
   const selected = useUI((s) => s.selectedTaskId === task.id);
   const lingering = useUI((s) => task.id in s.lingering);
+  const listName = useData((s) => (showList ? s.lists[task.listId]?.name : undefined));
   const quadrant = quadrantOf(task, { today, urgencyWindowDays });
   const subtitle = taskSubtitle(task, quadrant, today);
   const steps = stepProgress(task);
@@ -147,16 +157,6 @@ export const TaskRow = memo(function TaskRow({ task, today, dimmed, edge, inMyDa
         <button
           className="row__action"
           tabIndex={revealed ? 0 : -1}
-          onClick={() => {
-            closeReveal();
-            useUI.setState({ moveTaskId: task.id });
-          }}
-        >
-          Move to
-        </button>
-        <button
-          className="row__action"
-          tabIndex={revealed ? 0 : -1}
           disabled={inDay || done}
           onClick={() => {
             closeReveal();
@@ -164,6 +164,16 @@ export const TaskRow = memo(function TaskRow({ task, today, dimmed, edge, inMyDa
           }}
         >
           My Day
+        </button>
+        <button
+          className="row__action"
+          tabIndex={revealed ? 0 : -1}
+          onClick={() => {
+            closeReveal();
+            useUI.setState({ actionsTaskId: task.id });
+          }}
+        >
+          More
         </button>
       </div>
       <div
@@ -197,6 +207,7 @@ export const TaskRow = memo(function TaskRow({ task, today, dimmed, edge, inMyDa
           {subtitle && <span className="row__sub">{subtitle}</span>}
         </button>
         <span className="row__meta">
+          {listName && <span className="row__list">{listName}</span>}
           {task.due && !done && (
             <span className={overdue ? 'row__due is-overdue' : 'row__due'}>
               {formatDue(task.due, today)}
@@ -218,6 +229,17 @@ export const TaskRow = memo(function TaskRow({ task, today, dimmed, edge, inMyDa
             <PlayIcon />
           </button>
         )}
+        <button
+          className="icon-btn row__more"
+          aria-label={`More actions for ${task.title || 'task'}`}
+          aria-haspopup="dialog"
+          onClick={() => {
+            if (revealed) closeReveal();
+            useUI.setState({ actionsTaskId: task.id });
+          }}
+        >
+          <MoreIcon size={20} />
+        </button>
       </div>
     </div>
   );

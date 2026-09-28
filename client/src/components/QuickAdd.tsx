@@ -1,6 +1,7 @@
-import { parseQuickAdd, removeToken, type QuickAddToken } from '@frog/shared';
+import { isValidDateStr, parseQuickAdd, removeToken, type QuickAddToken } from '@frog/shared';
 import { forwardRef, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
-import { createFromQuickAdd } from '../data/actions';
+import { matchPath, useLocation, useSearchParams } from 'react-router-dom';
+import { createFromQuickAdd, liveLists, type QuickAddDefaults } from '../data/actions';
 import { useData } from '../data/store';
 import { useUI } from '../data/ui';
 import { formatDateLong, useToday } from '../lib/time';
@@ -27,6 +28,24 @@ function chipLabel(t: QuickAddToken, today: string): string {
   }
 }
 
+/**
+ * Where a new task goes when the input doesn't say: the list being viewed,
+ * My Day when adding from My Day, the day being viewed in the Agenda.
+ */
+function useQuickAddDefaults(): QuickAddDefaults {
+  const { pathname } = useLocation();
+  const [params] = useSearchParams();
+  const today = useToday();
+  const listMatch = matchPath('/lists/:listId', pathname);
+  if (listMatch) return { listId: listMatch.params.listId ?? null };
+  if (pathname === '/') return { myDay: true };
+  if (pathname === '/agenda' && params.get('view') !== 'week') {
+    const date = params.get('date');
+    return { due: date && isValidDateStr(date) ? date : today };
+  }
+  return {};
+}
+
 interface FieldProps {
   id?: string;
   onEscape?: () => void;
@@ -40,16 +59,36 @@ const QuickAddField = forwardRef<HTMLInputElement, FieldProps>(function QuickAdd
 ) {
   const [text, setText] = useState('');
   const lists = useData((s) => s.lists);
+  const defaultListId = useData((s) => s.settings.defaultListId);
   const today = useToday();
+  const defaults = useQuickAddDefaults();
   const parsed = useMemo(
     () => parseQuickAdd(text, { lists: Object.values(lists), today }),
     [text, lists, today],
   );
 
+  // The list and My Day choice follow the screen until the user changes them.
+  const screenList = defaults.listId ?? null;
+  const screenMyDay = !!defaults.myDay;
+  const [listPick, setListPick] = useState<string | null>(null);
+  const [myDayPick, setMyDayPick] = useState<boolean | null>(null);
+  useEffect(() => {
+    setListPick(null);
+    setMyDayPick(null);
+  }, [screenList, screenMyDay]);
+
+  const live = liveLists(lists);
+  const fallbackList = live.find((l) => l.id === defaultListId) ?? live[0];
+  const chosenList =
+    live.find((l) => l.id === (listPick ?? screenList))?.id ?? fallbackList?.id ?? '';
+  const myDay = myDayPick ?? screenMyDay;
+  const listFromToken = parsed.tokens.some((t) => t.kind === 'list' || t.kind === 'newList');
+  const dueFromScreen = !parsed.due && defaults.due ? defaults.due : null;
+
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
       e.preventDefault();
-      if (createFromQuickAdd(parsed)) setText('');
+      if (createFromQuickAdd(parsed, { listId: chosenList, due: defaults.due, myDay })) setText('');
     } else if (e.key === 'Escape') {
       e.preventDefault();
       e.currentTarget.blur();
@@ -75,6 +114,39 @@ const QuickAddField = forwardRef<HTMLInputElement, FieldProps>(function QuickAdd
         onChange={(e) => setText(e.target.value)}
         onKeyDown={onKeyDown}
       />
+      <div className="quick-add__meta">
+        {!listFromToken && (
+          <label className="quick-add__list">
+            <span>List</span>
+            <select
+              className="quick-add__select"
+              value={chosenList}
+              tabIndex={hidden ? -1 : undefined}
+              onChange={(e) => setListPick(e.target.value)}
+            >
+              {live.map((l) => (
+                <option key={l.id} value={l.id}>
+                  {l.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+        {(screenMyDay || myDayPick !== null) && !parsed.addToMyDay && (
+          <button
+            type="button"
+            className="quick-add__toggle"
+            aria-pressed={myDay}
+            tabIndex={hidden ? -1 : undefined}
+            onClick={() => setMyDayPick(!myDay)}
+          >
+            {myDay ? '✓ My Day' : 'My Day'}
+          </button>
+        )}
+        {dueFromScreen && (
+          <span className="quick-add__hint">Due {formatDateLong(dueFromScreen, today)}</span>
+        )}
+      </div>
       {parsed.tokens.length > 0 && (
         <ul className="chips" aria-label="Parsed details">
           {parsed.tokens.map((t) => (

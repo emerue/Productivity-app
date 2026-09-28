@@ -63,7 +63,7 @@ function DraggableRow({ task, today }: { task: Task; today: DateStr }) {
       data-dragging={isDragging || undefined}
       {...listeners}
     >
-      <TaskRow task={task} today={today} edge />
+      <TaskRow task={task} today={today} edge showList />
     </div>
   );
 }
@@ -212,7 +212,7 @@ export function QuadrantScreen() {
       ) : (
         <div className="rows" role="list">
           {tasks.map((t) => (
-            <TaskRow key={t.id} task={t} today={today} edge />
+            <TaskRow key={t.id} task={t} today={today} edge showList />
           ))}
         </div>
       )}

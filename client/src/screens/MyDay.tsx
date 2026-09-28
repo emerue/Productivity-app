@@ -1,4 +1,4 @@
-import { isOpen, rankTasks, type DateStr, type Task } from '@frog/shared';
+import { addDays, isOpen, rankTasks, type DateStr, type Task } from '@frog/shared';
 import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FrogSlot } from '../components/FrogCard';
@@ -13,6 +13,9 @@ import { useUI } from '../data/ui';
 import { useTaskDetail } from '../lib/hooks';
 import { useVisibleTasks } from '../lib/keyboard';
 import { formatDue, formatHeaderDate, useToday } from '../lib/time';
+
+/** How far back "From earlier days" looks for unfinished My Day tasks. */
+const LEFTOVER_DAYS = 14;
 
 function PickFrog({ candidates }: { candidates: Task[] }) {
   return (
@@ -70,6 +73,75 @@ function DueUnplanned({ tasks, today }: { tasks: Task[]; today: DateStr }) {
   );
 }
 
+function FromEarlier({ tasks, today }: { tasks: Task[]; today: DateStr }) {
+  const [open, setOpen] = useState(false);
+  const { openTask } = useTaskDetail();
+  return (
+    <section className="due-unplanned">
+      <button
+        className="due-unplanned__toggle"
+        aria-expanded={open}
+        onClick={() => setOpen((o) => !o)}
+      >
+        <span>
+          From earlier days <span className="num">({tasks.length})</span>
+        </span>
+        <ChevronRight className="due-unplanned__chevron" />
+      </button>
+      {open && (
+        <>
+          <ul className="due-unplanned__list">
+            {tasks.map((t) => (
+              <li key={t.id} className="due-unplanned__row">
+                <button className="due-unplanned__main" onClick={() => openTask(t.id)}>
+                  <span className="row__title">{t.title}</span>
+                  {t.due && (
+                    <span className={t.due < today ? 'row__due is-overdue' : 'row__due'}>
+                      {formatDue(t.due, today)}
+                    </span>
+                  )}
+                </button>
+                <button className="btn btn--text btn--small" onClick={() => addToMyDay(t.id)}>
+                  Add to My Day
+                </button>
+              </li>
+            ))}
+          </ul>
+          {tasks.length > 1 && (
+            <button
+              className="btn btn--text btn--small due-unplanned__all"
+              onClick={() => tasks.forEach((t) => addToMyDay(t.id))}
+            >
+              Add all to My Day
+            </button>
+          )}
+        </>
+      )}
+    </section>
+  );
+}
+
+function CompletedToday({ tasks, today }: { tasks: Task[]; today: DateStr }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <section className="group group--done">
+      <button className="group__toggle" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+        <span>
+          Completed <span className="num">({tasks.length})</span>
+        </span>
+        <ChevronRight className="group__chevron" />
+      </button>
+      {open && (
+        <div className="rows" role="list" aria-label="Completed today">
+          {tasks.map((t) => (
+            <TaskRow key={t.id} task={t} today={today} inMyDay showList />
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
 export function MyDayScreen() {
   const navigate = useNavigate();
   const today = useToday();
@@ -92,6 +164,18 @@ export function MyDayScreen() {
     const dueUnplanned = Object.values(tasks)
       .filter((t) => isOpen(t) && t.due !== null && t.due <= today && !inDay.has(t.id))
       .sort((a, b) => a.due!.localeCompare(b.due!) || a.createdAt.localeCompare(b.createdAt));
+    const completed = planned.filter((t) => t.status === 'done' && !(t.id in lingering));
+    const due = new Set(dueUnplanned.map((t) => t.id));
+    const from = addDays(today, -LEFTOVER_DAYS);
+    const earlierIds: string[] = [];
+    for (const d of Object.values(days).sort((a, b) => b.date.localeCompare(a.date))) {
+      if (d.date >= today || d.date < from) continue;
+      for (const id of [d.frog, ...d.myDay])
+        if (id && !earlierIds.includes(id)) earlierIds.push(id);
+    }
+    const earlier = earlierIds
+      .map((id) => tasks[id])
+      .filter((t): t is Task => !!t && isOpen(t) && !inDay.has(t.id) && !due.has(t.id));
     const hasAnything = frog !== null || planned.length > 0;
     const allDone =
       hasAnything && (!frog || frog.status === 'done') && planned.every((t) => t.status !== 'open');
@@ -101,10 +185,10 @@ export function MyDayScreen() {
           .filter((t) => t.important)
           .sort((a, b) => Number(inDay.has(b.id)) - Number(inDay.has(a.id)))
           .slice(0, 3);
-    return { frog, rows, dueUnplanned, hasAnything, allDone, candidates };
-  }, [tasks, day, today, lingering, urgencyWindowDays]);
+    return { frog, rows, dueUnplanned, earlier, completed, hasAnything, allDone, candidates };
+  }, [tasks, day, days, today, lingering, urgencyWindowDays]);
 
-  const { frog, rows, dueUnplanned, hasAnything, allDone, candidates } = view;
+  const { frog, rows, dueUnplanned, earlier, completed, hasAnything, allDone, candidates } = view;
   const frogOpen = frog?.status === 'open';
   useVisibleTasks([...(frogOpen ? [frog.id] : []), ...rows.map((t) => t.id)]);
 
@@ -145,6 +229,7 @@ export function MyDayScreen() {
               task={t}
               today={today}
               inMyDay
+              showList
               dimmed={frogOpen && !(t.due !== null && t.due <= today)}
             />
           ))}
@@ -170,6 +255,8 @@ export function MyDayScreen() {
       )}
 
       {dueUnplanned.length > 0 && <DueUnplanned tasks={dueUnplanned} today={today} />}
+      {earlier.length > 0 && <FromEarlier tasks={earlier} today={today} />}
+      {completed.length > 0 && <CompletedToday tasks={completed} today={today} />}
     </section>
   );
 }

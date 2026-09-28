@@ -4,6 +4,7 @@ import { Shell } from './components/Shell';
 import { useData } from './data/store';
 import { boot } from './data/sync';
 import { applyTheme } from './lib/theme';
+import { AgendaScreen } from './screens/Agenda';
 import { FocusScreen } from './screens/Focus';
 import { ListsScreen } from './screens/Lists';
 import { ListScreen } from './screens/ListView';
@@ -39,6 +40,7 @@ export function App() {
             <Route path="/plan" element={<PlanScreen />} />
             <Route element={<Shell />}>
               <Route index element={<MyDayScreen />} />
+              <Route path="agenda" element={<AgendaScreen />} />
               <Route path="matrix" element={<MatrixScreen />} />
               <Route path="matrix/:quadrant" element={<QuadrantScreen />} />
               <Route path="lists" element={<ListsScreen />} />

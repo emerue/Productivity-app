@@ -54,6 +54,49 @@
   margin: 0 -8px;
 }
 
+/* Task actions (⋯ on a row) */
+
+.dialog:has(.actions__title) {
+  max-height: calc(100dvh - 2 * var(--gutter));
+  overflow-y: auto;
+}
+
+.actions__title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.actions__due {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 52px;
+  padding: 0 4px;
+  border-top: 1px solid var(--line);
+}
+
+.actions__due .meta-input {
+  flex: none;
+  width: auto;
+  min-height: 36px;
+}
+
+.actions__section {
+  margin: 16px 0 4px;
+  color: var(--ink-2);
+  font-size: var(--fs-meta);
+  font-weight: 600;
+}
+
+.actions__lists .choice[aria-current] .choice__label {
+  font-weight: 600;
+}
+
+.actions__footer {
+  justify-content: space-between;
+}
+
 /* ---------------------------------------------------------------------------
    Matrix
    ------------------------------------------------------------------------ */
@@ -353,4 +396,71 @@
   min-width: 0;
   min-height: var(--hit);
   justify-content: center;
+}
+
+/* ---------------------------------------------------------------------------
+   Agenda (day / week)
+   ------------------------------------------------------------------------ */
+
+.agenda__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  margin-bottom: 12px;
+}
+
+.agenda__views {
+  grid-template-columns: repeat(2, 1fr);
+  width: 11rem;
+  margin-bottom: 0;
+}
+
+.agenda__nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.agenda__range {
+  min-width: 8.5rem;
+  text-align: center;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.agenda__summary {
+  margin: 12px 0 0;
+  color: var(--ink-2);
+  font-size: var(--fs-meta);
+}
+
+.agenda__day[data-today] > .group__title {
+  color: var(--frog);
+}
+
+.agenda__overdue {
+  color: var(--danger);
+}
+
+.agenda__daylink {
+  color: inherit;
+  text-decoration: none;
+}
+
+.agenda__daylink:hover {
+  text-decoration: underline;
+}
+
+.agenda__count {
+  margin-left: auto;
+  color: var(--ink-3);
+  font-weight: 500;
+}
+
+.agenda__empty {
+  padding: 8px 0 4px;
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
 }

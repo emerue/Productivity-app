@@ -191,6 +191,28 @@
   display: none;
 }
 
+.row__more {
+  width: 36px;
+  margin-right: -8px;
+  color: var(--ink-3);
+}
+
+.row__list {
+  max-width: 8rem;
+  padding: 1px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 420px) {
+  .row__list {
+    max-width: 5.5rem;
+  }
+}
+
 .row[data-dimmed] .row__title,
 .row[data-dimmed] .row__sub,
 .row[data-dimmed] .row__meta {
@@ -505,6 +527,49 @@
   color: var(--ink-3);
   font-size: 1rem;
   line-height: 1;
+}
+
+/* Where the task will land: list picker, My Day toggle, due from the Agenda day. */
+.quick-add__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  margin-top: 6px;
+  color: var(--ink-2);
+  font-size: var(--fs-meta);
+}
+
+.quick-add__list {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.quick-add__select {
+  min-height: 32px;
+  max-width: 14rem;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: var(--fs-meta);
+}
+
+.quick-add__toggle {
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: var(--fs-meta);
+}
+
+.quick-add__toggle[aria-pressed='true'] {
+  border-color: var(--frog);
+  color: var(--frog);
 }
 
 .fab {

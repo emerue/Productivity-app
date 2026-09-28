@@ -12,6 +12,8 @@ interface UIState {
   toast: Toast | null;
   /** Task whose "Move to…" sheet is open. */
   moveTaskId: string | null;
+  /** Task whose actions sheet (edit, list, due, delete…) is open. */
+  actionsTaskId: string | null;
   /** Task whose move hit a due-date conflict, with the quadrant the user asked for. */
   conflict: { taskId: string; target: 'schedule' | 'drop' } | null;
   quickAddOpen: boolean;
@@ -36,6 +38,7 @@ export interface ConfirmRequest {
 export const useUI = create<UIState>()(() => ({
   toast: null,
   moveTaskId: null,
+  actionsTaskId: null,
   conflict: null,
   quickAddOpen: false,
   selectedTaskId: null,

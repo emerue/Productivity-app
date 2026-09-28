@@ -257,7 +257,7 @@ function ClosedTasks({ status }: { status: 'done' | 'archived' }) {
       {status === 'done' ? (
         <div className="rows" role="list">
           {items.map((t) => (
-            <TaskRow key={t.id} task={t} today={today} />
+            <TaskRow key={t.id} task={t} today={today} showList />
           ))}
         </div>
       ) : (

@@ -165,8 +165,21 @@ export function defaultListId(): string {
   return l && !l.deleted ? l.id : (liveLists()[0]?.id ?? s.settings.defaultListId);
 }
 
+/** What quick add uses when the input has no token for it (from the screen it's on). */
+export interface QuickAddDefaults {
+  /** The list being viewed. */
+  listId?: string | null;
+  /** The day being viewed in the Agenda. */
+  due?: DateStr | null;
+  /** Adding from My Day puts the task in My Day. */
+  myDay?: boolean;
+}
+
 /** Creates a task from parsed quick-add input and says where it landed. */
-export function createFromQuickAdd(r: QuickAddResult): Task | null {
+export function createFromQuickAdd(
+  r: QuickAddResult,
+  defaults: QuickAddDefaults = {},
+): Task | null {
   const title = r.title.trim();
   if (!title) return null;
   const now = iso();
@@ -178,7 +191,9 @@ export function createFromQuickAdd(r: QuickAddResult): Task | null {
     lists.push(list);
     listId = list.id;
   }
-  listId ??= defaultListId();
+  const fallback = defaults.listId ? state().lists[defaults.listId] : undefined;
+  listId ??= fallback && !fallback.deleted ? fallback.id : defaultListId();
+  const addToMyDay = r.addToMyDay || !!defaults.myDay;
 
   let task = newTask(
     {
@@ -186,7 +201,7 @@ export function createFromQuickAdd(r: QuickAddResult): Task | null {
       listId,
       important: r.important,
       urgentFlag: r.urgentFlag,
-      due: r.due,
+      due: r.due ?? defaults.due ?? null,
       waitingOn: r.waitingOn,
     },
     now,
@@ -194,7 +209,7 @@ export function createFromQuickAdd(r: QuickAddResult): Task | null {
   const date = today();
   const before = dayOf(date);
   const days: Day[] = [];
-  if (r.addToMyDay) {
+  if (addToMyDay) {
     task = logEvent(task, 'addedToMyDay', now, { date });
     days.push(editDay(date, (d) => ({ ...d, myDay: [...d.myDay, task.id] })));
   }
@@ -203,7 +218,7 @@ export function createFromQuickAdd(r: QuickAddResult): Task | null {
 
   const listName = lists[0]?.name ?? state().lists[listId]?.name ?? 'list';
   const where = `${QUADRANT_LABEL[quadrantOf(task, urgencyCtx(date))]} in ${listName}`;
-  showToast(r.addToMyDay ? `Added to ${where} and My Day` : `Added to ${where}`, {
+  showToast(addToMyDay ? `Added to ${where} and My Day` : `Added to ${where}`, {
     label: 'Undo',
     run: () => undoCreate(task.id),
   });
@@ -272,6 +287,22 @@ export function updateTask(
   if (!task) return;
   const next = patchTask(task, patch, iso());
   commit({ tasks: [next], days: leavesMyDay(task, next) });
+}
+
+/** Moves a task to another list, with undo. */
+export function moveToList(id: string, listId: string): void {
+  const task = liveTask(id);
+  const list = state().lists[listId];
+  if (!task || !list || list.deleted || task.listId === listId) return;
+  const from = task.listId;
+  commit({ tasks: [patchTask(task, { listId }, iso())] });
+  showToast(`Moved to ${list.name}`, {
+    label: 'Undo',
+    run: () => {
+      const current = liveTask(id);
+      if (current) commit({ tasks: [patchTask(current, { listId: from }, iso())] });
+    },
+  });
 }
 
 export function updateNotes(id: string, notes: string): void {
