@@ -7,7 +7,7 @@
 #   deploy/deploy.sh rollback          switch back to the previous release
 #   deploy/deploy.sh status            service state and /api/health
 #   deploy/deploy.sh tunnel            open the app at http://localhost:3080 via SSH
-#   deploy/deploy.sh https DOMAIN EMAIL  certificate + Nginx site for DOMAIN
+#   deploy/deploy.sh https DOMAIN [EMAIL]  certificate + Nginx site for DOMAIN
 #   deploy/deploy.sh backup            copy daily backups to ./backups/ on this machine
 #
 # Needs: bash (Git Bash on Windows), node, npm, tar, ssh, scp.
@@ -92,8 +92,8 @@ case "${1:-release}" in
     ;;
 
   https)
-    domain=${2:?usage: deploy.sh https DOMAIN EMAIL}
-    email=${3:?usage: deploy.sh https DOMAIN EMAIL}
+    domain=${2:?usage: deploy.sh https DOMAIN [EMAIL]}
+    email=${3:-}
     remote https "$domain" "$email"
     ;;
 

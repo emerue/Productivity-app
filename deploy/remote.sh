@@ -203,7 +203,10 @@ status() {
 }
 
 https() {
-  local domain=${1:?https needs a domain} email=${2:?https needs an email}
+  local domain=${1:?https needs a domain} email=${2:-}
+  # No email: Let's Encrypt sends no expiry notices (renewal is automatic anyway).
+  local contact=(--register-unsafely-without-email)
+  [ -n "$email" ] && contact=(-m "$email")
   [ -f "$APP/deploy/nginx.conf.template" ] || die "Deploy a release first."
   command -v nginx >/dev/null || die "Nginx is not installed."
 
@@ -214,7 +217,7 @@ https() {
   fi
 
   say "Requesting a certificate for $domain"
-  certbot certonly --nginx -d "$domain" --non-interactive --agree-tos -m "$email" --keep-until-expiring
+  certbot certonly --nginx -d "$domain" --non-interactive --agree-tos "${contact[@]}" --keep-until-expiring
 
   say "Installing the Nginx site"
   sed "s/\${DOMAIN}/$domain/g" "$APP/deploy/nginx.conf.template" >/etc/nginx/sites-available/frog
