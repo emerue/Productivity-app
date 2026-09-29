@@ -73,50 +73,52 @@ export function AgendaScreen() {
 
   return (
     <section className="screen agenda">
-      <header className="screen-head">
-        <h1>Agenda</h1>
-      </header>
+      <div className="screen-top">
+        <header className="screen-head">
+          <h1>Agenda</h1>
+        </header>
 
-      <div className="agenda__bar">
-        <nav className="segmented agenda__views" aria-label="Range">
-          {(['day', 'week'] as const).map((v) => (
-            <Link
-              key={v}
-              to={href(v, date)}
-              className="segmented__item"
-              aria-current={v === view ? 'page' : undefined}
+        <div className="agenda__bar">
+          <nav className="segmented agenda__views" aria-label="Range">
+            {(['day', 'week'] as const).map((v) => (
+              <Link
+                key={v}
+                to={href(v, date)}
+                className="segmented__item"
+                aria-current={v === view ? 'page' : undefined}
+              >
+                {v === 'day' ? 'Day' : 'Week'}
+              </Link>
+            ))}
+          </nav>
+          <div className="agenda__nav">
+            <button
+              className="icon-btn"
+              aria-label={view === 'day' ? 'Previous day' : 'Previous week'}
+              onClick={() => go({ date: addDays(date, -count) })}
             >
-              {v === 'day' ? 'Day' : 'Week'}
-            </Link>
-          ))}
-        </nav>
-        <div className="agenda__nav">
-          <button
-            className="icon-btn"
-            aria-label={view === 'day' ? 'Previous day' : 'Previous week'}
-            onClick={() => go({ date: addDays(date, -count) })}
-          >
-            <ChevronLeft />
-          </button>
-          <span className="agenda__range" aria-live="polite">
-            {rangeLabel(view, start, today)}
-          </span>
-          <button
-            className="icon-btn"
-            aria-label={view === 'day' ? 'Next day' : 'Next week'}
-            onClick={() => go({ date: addDays(date, count) })}
-          >
-            <ChevronRight />
-          </button>
-          {!includesToday && (
-            <button className="btn btn--text btn--small" onClick={() => go({ date: today })}>
-              Today
+              <ChevronLeft />
             </button>
-          )}
+            <span className="agenda__range" aria-live="polite">
+              {rangeLabel(view, start, today)}
+            </span>
+            <button
+              className="icon-btn"
+              aria-label={view === 'day' ? 'Next day' : 'Next week'}
+              onClick={() => go({ date: addDays(date, count) })}
+            >
+              <ChevronRight />
+            </button>
+            {!includesToday && (
+              <button className="btn btn--text btn--small" onClick={() => go({ date: today })}>
+                Today
+              </button>
+            )}
+          </div>
         </div>
-      </div>
 
-      <QuickAddInline />
+        <QuickAddInline />
+      </div>
 
       <p className="agenda__summary">
         {total === 0
@@ -131,7 +133,7 @@ export function AgendaScreen() {
           <h2 className="group__title agenda__overdue" id="agenda-overdue">
             Overdue <span className="num">({overdue.length})</span>
           </h2>
-          <div className="rows" role="list">
+          <div className="rows scroll-box" role="list">
             {overdue.map((t) => (
               <TaskRow key={t.id} task={t} today={today} edge showList />
             ))}
@@ -159,7 +161,7 @@ export function AgendaScreen() {
             )}
           </h2>
           {d.tasks.length > 0 ? (
-            <div className="rows" role="list">
+            <div className={view === 'week' ? 'rows scroll-box' : 'rows'} role="list">
               {d.tasks.map((t) => (
                 <TaskRow key={t.id} task={t} today={today} edge showList />
               ))}

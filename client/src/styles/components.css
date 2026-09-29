@@ -7,8 +7,10 @@
 }
 
 .main {
+  /* Side padding, shared with the sticky screen top so it can bleed to the edges. */
+  --pad-x: var(--gutter);
   min-width: 0;
-  padding: 0 var(--gutter) calc(var(--tabbar-h) + var(--safe-bottom) + 88px);
+  padding: 0 var(--pad-x) calc(var(--tabbar-h) + var(--safe-bottom) + 88px);
   padding-top: var(--safe-top);
 }
 
@@ -78,9 +80,10 @@
   }
 
   .main {
+    --pad-x: 32px;
     max-width: calc(720px + 64px);
     width: 100%;
-    padding: 0 32px 64px;
+    padding: 0 var(--pad-x) 64px;
   }
 }
 
@@ -140,6 +143,74 @@
 /* ---------------------------------------------------------------------------
    Screen header
    ------------------------------------------------------------------------ */
+
+/* Header (and quick add / toolbar) stay put while the list scrolls under them. */
+.screen-top {
+  position: sticky;
+  top: 0;
+  z-index: 15;
+  margin: calc(-1 * var(--safe-top)) calc(-1 * var(--pad-x)) 0;
+  padding: var(--safe-top) var(--pad-x) 0;
+  background: var(--paper);
+}
+
+/* Hairline under the pinned area, as wide as the content column. */
+.screen-top::after {
+  content: '';
+  position: absolute;
+  inset: auto var(--pad-x) 0;
+  height: 1px;
+  background: var(--line);
+}
+
+/* Where supported, the hairline only appears once the page has scrolled. */
+@supports (animation-timeline: scroll()) {
+  .screen-top::after {
+    opacity: 0;
+    animation: screen-top-line linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 16px;
+  }
+
+  @keyframes screen-top-line {
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+.screen-top .quick-add--inline {
+  margin-bottom: 12px;
+}
+
+/* Keyboard selection (J/K) scrolls rows clear of the sticky top. */
+.row {
+  scroll-margin-top: 140px;
+}
+
+@media (min-width: 1024px) {
+  .row {
+    scroll-margin-top: 240px;
+  }
+}
+
+/* A long secondary list (completed, earlier days, a busy day in the week) scrolls
+   inside its own box instead of stretching the page. */
+.scroll-box {
+  max-height: min(55dvh, 26rem);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+.scroll-box::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scroll-box::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  background: var(--line);
+}
 
 .screen-head {
   display: flex;

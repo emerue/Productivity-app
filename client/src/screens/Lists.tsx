@@ -95,23 +95,25 @@ export function ListsScreen() {
 
   return (
     <section className="screen lists">
-      <header className="screen-head">
-        <h1>Lists</h1>
-      </header>
-      <QuickAddInline />
-      <div className="search">
-        <SearchIcon className="search__icon" />
-        <label className="visually-hidden" htmlFor="search">
-          Search tasks
-        </label>
-        <input
-          id="search"
-          className="field search__input"
-          type="search"
-          placeholder="Search tasks"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
+      <div className="screen-top">
+        <header className="screen-head">
+          <h1>Lists</h1>
+        </header>
+        <QuickAddInline />
+        <div className="search">
+          <SearchIcon className="search__icon" />
+          <label className="visually-hidden" htmlFor="search">
+            Search tasks
+          </label>
+          <input
+            id="search"
+            className="field search__input"
+            type="search"
+            placeholder="Search tasks"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
       </div>
 
       {query.trim() ? (

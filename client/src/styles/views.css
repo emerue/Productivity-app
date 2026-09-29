@@ -464,3 +464,29 @@
   color: var(--ink-3);
   font-size: var(--fs-meta);
 }
+
+/* List toolbar: open count and sort */
+
+.list-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  color: var(--ink-2);
+  font-size: var(--fs-meta);
+}
+
+.list-toolbar__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.list-view__flat {
+  margin-top: 8px;
+}
+
+.agenda .scroll-box {
+  max-height: min(45dvh, 17.5rem);
+}

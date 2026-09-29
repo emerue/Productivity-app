@@ -19,6 +19,7 @@ import { askConfirm, useUI } from '../data/ui';
 import { rankWithLingering } from '../lib/format';
 import { useIsDesktop, useTaskDetail } from '../lib/hooks';
 import { useVisibleTasks } from '../lib/keyboard';
+import { readTaskSort, sortTasks, TASK_SORTS, writeTaskSort, type TaskSort } from '../lib/sort';
 import { useToday } from '../lib/time';
 
 function BackToLists() {
@@ -151,6 +152,39 @@ function ListHeader({ list, taskCount }: { list: List; taskCount: number }) {
   );
 }
 
+/** Open count and the sort menu, under the list's quick add. */
+function ListToolbar({
+  count,
+  sort,
+  onSort,
+}: {
+  count: number;
+  sort: TaskSort;
+  onSort: (s: TaskSort) => void;
+}) {
+  return (
+    <div className="list-toolbar">
+      <span className="list-toolbar__count num">
+        {count} open {count === 1 ? 'task' : 'tasks'}
+      </span>
+      <label className="list-toolbar__sort">
+        <span>Sort</span>
+        <select
+          className="pill-select"
+          value={sort}
+          onChange={(e) => onSort(e.target.value as TaskSort)}
+        >
+          {TASK_SORTS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+      </label>
+    </div>
+  );
+}
+
 function OneList({ list }: { list: List }) {
   const today = useToday();
   const isDesktop = useIsDesktop();
@@ -158,47 +192,66 @@ function OneList({ list }: { list: List }) {
   const lingering = useUI((s) => s.lingering);
   const urgencyWindowDays = useData((s) => s.settings.urgencyWindowDays);
   const [showDone, setShowDone] = useState(false);
+  const [sort, setSort] = useState<TaskSort>(readTaskSort);
+  const changeSort = (next: TaskSort) => {
+    setSort(next);
+    writeTaskSort(next);
+  };
 
-  const { groups, done, total } = useMemo(() => {
+  const { groups, flat, done, total } = useMemo(() => {
     const ctx = { today, urgencyWindowDays };
     const inList = Object.values(tasks).filter((t) => !t.deleted && t.listId === list.id);
     const g: Record<Quadrant, Task[]> = { do: [], schedule: [], delegate: [], drop: [] };
-    for (const t of rankWithLingering(inList, lingering, { target: today, settings: ctx }))
-      g[quadrantOf(t, ctx)].push(t);
+    const ranked = rankWithLingering(inList, lingering, { target: today, settings: ctx });
+    for (const t of ranked) g[quadrantOf(t, ctx)].push(t);
+    const f = sort === 'priority' ? ranked : sortTasks(ranked, sort);
     const d = inList
       .filter((t) => t.status === 'done')
       .sort((a, b) => (b.completedAt ?? '').localeCompare(a.completedAt ?? ''));
-    return { groups: g, done: d, total: inList.length };
-  }, [tasks, list.id, today, urgencyWindowDays, lingering]);
+    return { groups: g, flat: f, done: d, total: inList.length };
+  }, [tasks, list.id, today, urgencyWindowDays, lingering, sort]);
 
-  const openCount = QUADRANTS.reduce((n, q) => n + groups[q].length, 0);
+  const openCount = flat.filter((t) => t.status === 'open').length;
   useVisibleTasks([
-    ...QUADRANTS.flatMap((q) => groups[q].map((t) => t.id)),
+    ...(sort === 'priority'
+      ? QUADRANTS.flatMap((q) => groups[q].map((t) => t.id))
+      : flat.map((t) => t.id)),
     ...(showDone ? done.map((t) => t.id) : []),
   ]);
 
   return (
     <section className="screen list-view">
-      <ListHeader list={list} taskCount={total} />
-      <QuickAddInline />
-      {openCount === 0 && (
+      <div className="screen-top">
+        <ListHeader list={list} taskCount={total} />
+        <QuickAddInline />
+        {flat.length > 0 && <ListToolbar count={openCount} sort={sort} onSort={changeSort} />}
+      </div>
+      {flat.length === 0 && (
         <p className="empty">
           {isDesktop ? 'No tasks here yet. Add one above.' : 'No tasks here yet. Add one with +.'}
         </p>
       )}
-      {QUADRANTS.filter((q) => groups[q].length > 0).map((q) => (
-        <section key={q} className="group" aria-labelledby={`group-${q}`}>
-          <h2 className="group__title" id={`group-${q}`}>
-            <span className="q-dot" data-q={q} aria-hidden="true" />
-            {QUADRANT_LABEL[q]}
-          </h2>
-          <div className="rows" role="list">
-            {groups[q].map((t) => (
-              <TaskRow key={t.id} task={t} today={today} edge />
-            ))}
-          </div>
-        </section>
-      ))}
+      {sort === 'priority'
+        ? QUADRANTS.filter((q) => groups[q].length > 0).map((q) => (
+            <section key={q} className="group" aria-labelledby={`group-${q}`}>
+              <h2 className="group__title" id={`group-${q}`}>
+                <span className="q-dot" data-q={q} aria-hidden="true" />
+                {QUADRANT_LABEL[q]}
+              </h2>
+              <div className="rows" role="list">
+                {groups[q].map((t) => (
+                  <TaskRow key={t.id} task={t} today={today} edge />
+                ))}
+              </div>
+            </section>
+          ))
+        : flat.length > 0 && (
+            <div className="rows list-view__flat" role="list" aria-label={`${list.name} tasks`}>
+              {flat.map((t) => (
+                <TaskRow key={t.id} task={t} today={today} edge />
+              ))}
+            </div>
+          )}
       {done.length > 0 && (
         <section className="group group--done">
           <button
@@ -212,7 +265,7 @@ function OneList({ list }: { list: List }) {
             <ChevronRight className="group__chevron" />
           </button>
           {showDone && (
-            <div className="rows" role="list">
+            <div className="rows scroll-box" role="list">
               {done.map((t) => (
                 <TaskRow key={t.id} task={t} today={today} />
               ))}
@@ -245,10 +298,12 @@ function ClosedTasks({ status }: { status: 'done' | 'archived' }) {
 
   return (
     <section className="screen list-view">
-      <header className="screen-head">
-        <BackToLists />
-        <h1>{title}</h1>
-      </header>
+      <div className="screen-top">
+        <header className="screen-head">
+          <BackToLists />
+          <h1>{title}</h1>
+        </header>
+      </div>
       {items.length === 0 && (
         <p className="empty">
           {status === 'done' ? 'Nothing completed yet.' : 'Nothing archived.'}
@@ -284,8 +339,11 @@ function ClosedTasks({ status }: { status: 'done' | 'archived' }) {
 export function ListScreen() {
   const { listId } = useParams();
   const list = useData((s) => (listId ? s.lists[listId] : undefined));
+  const settled = useData((s) => s.sync.settled);
   if (listId === 'completed') return <ClosedTasks status="done" />;
   if (listId === 'archived') return <ClosedTasks status="archived" />;
+  // A list made on another device may arrive with the first sync; wait for it.
+  if (!list && !settled) return <section className="screen list-view" aria-busy="true" />;
   if (!list || list.deleted) return <Navigate to="/lists" replace />;
   return <OneList key={list.id} list={list} />;
 }

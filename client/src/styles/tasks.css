@@ -546,7 +546,8 @@
   gap: 6px;
 }
 
-.quick-add__select {
+.quick-add__select,
+.pill-select {
   min-height: 32px;
   max-width: 14rem;
   padding: 0 8px;

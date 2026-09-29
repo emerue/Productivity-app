@@ -115,7 +115,7 @@ function buildChanges(s: DataState, keys: string[]): Changes {
 async function runSync(): Promise<void> {
   const s = useData.getState();
   if (!navigator.onLine) {
-    setSync({ online: false });
+    setSync({ online: false, settled: true });
     return;
   }
   const sent = { ...s.outbox };
@@ -137,7 +137,7 @@ async function runSync(): Promise<void> {
       if (status === 400) console.error('[frog] Server rejected local changes', err);
     }
   } finally {
-    setSync({ syncing: false });
+    setSync({ syncing: false, settled: true });
   }
 }
 

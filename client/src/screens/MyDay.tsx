@@ -53,7 +53,7 @@ function DueUnplanned({ tasks, today }: { tasks: Task[]; today: DateStr }) {
         <ChevronRight className="due-unplanned__chevron" />
       </button>
       {open && (
-        <ul className="due-unplanned__list">
+        <ul className="due-unplanned__list scroll-box">
           {tasks.map((t) => (
             <li key={t.id} className="due-unplanned__row">
               <button className="due-unplanned__main" onClick={() => openTask(t.id)}>
@@ -90,7 +90,7 @@ function FromEarlier({ tasks, today }: { tasks: Task[]; today: DateStr }) {
       </button>
       {open && (
         <>
-          <ul className="due-unplanned__list">
+          <ul className="due-unplanned__list scroll-box">
             {tasks.map((t) => (
               <li key={t.id} className="due-unplanned__row">
                 <button className="due-unplanned__main" onClick={() => openTask(t.id)}>
@@ -132,7 +132,7 @@ function CompletedToday({ tasks, today }: { tasks: Task[]; today: DateStr }) {
         <ChevronRight className="group__chevron" />
       </button>
       {open && (
-        <div className="rows" role="list" aria-label="Completed today">
+        <div className="rows scroll-box" role="list" aria-label="Completed today">
           {tasks.map((t) => (
             <TaskRow key={t.id} task={t} today={today} inMyDay showList />
           ))}
@@ -194,19 +194,21 @@ export function MyDayScreen() {
 
   return (
     <section className="screen my-day">
-      <header className="screen-head">
-        <h1>My Day</h1>
-        <span className="screen-head__date">{formatHeaderDate(today)}</span>
-        <Menu
-          label="My Day options"
-          items={[
-            { label: 'Plan tomorrow', onSelect: () => navigate('/plan') },
-            !day.planned && { label: 'Plan today', onSelect: () => navigate('/plan?day=today') },
-            { label: 'Settings', onSelect: () => navigate('/settings') },
-          ]}
-        />
-      </header>
-      <QuickAddInline />
+      <div className="screen-top">
+        <header className="screen-head">
+          <h1>My Day</h1>
+          <span className="screen-head__date">{formatHeaderDate(today)}</span>
+          <Menu
+            label="My Day options"
+            items={[
+              { label: 'Plan tomorrow', onSelect: () => navigate('/plan') },
+              !day.planned && { label: 'Plan today', onSelect: () => navigate('/plan?day=today') },
+              { label: 'Settings', onSelect: () => navigate('/settings') },
+            ]}
+          />
+        </header>
+        <QuickAddInline />
+      </div>
       <PlanBanner today={today} />
 
       {!hasAnything && (

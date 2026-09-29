@@ -10,6 +10,8 @@ export interface SyncState {
   /** Server said 401; local data is kept, a banner asks to sign in again. */
   authRequired: boolean;
   syncing: boolean;
+  /** The first sync this session has finished (or can't run offline). */
+  settled: boolean;
 }
 
 export interface DataState {
@@ -57,6 +59,7 @@ export const useData = create<DataState>()(() => ({
     failures: 0,
     authRequired: false,
     syncing: false,
+    settled: false,
   },
 }));
 

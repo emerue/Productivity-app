@@ -73,6 +73,10 @@ Small calls made while building. The brief's settled decisions are not repeated 
 
 - **Borrowed from Microsoft To Do.** Rows show their list name wherever lists mix (My Day, Matrix, Agenda, search, Completed). The sidebar shows open counts for My Day and each list. My Day has a collapsible "Completed" section and "From earlier days": open tasks from the last 14 days' My Days that aren't in today's (tasks already due show under "Due today, not planned" instead), each with Add to My Day, plus Add all. Not borrowed: a star on each row (in Frog, importance decides the quadrant and most tasks are important, so the star would be on almost everything), background images, shared lists, assigned-to-me and flagged email (single user, no Outlook).
 
+- **List sorting.** A list's open tasks default to **Recently updated** (newest `updatedAt` on top, so a task you just edited or added jumps up). Also Priority (the original quadrant groups), Due date (dated first, soonest on top) and Name (natural order: "Task 9" before "Task 10"). The choice is per device (localStorage), shared by all lists.
+- **Long pages.** Each screen's header (and quick add, and the list toolbar) is sticky, with a content-width hairline that appears once the page scrolls. Secondary lists that can grow without limit scroll inside a capped box instead of stretching the page: Completed (list and My Day), From earlier days, Due today not planned, Overdue and each day in the Agenda week. The main list keeps normal page scrolling. Matrix cells and the task panel already scrolled on their own.
+- **Deep links wait for the first sync.** Opening `/lists/<id>` for a list made on another device used to redirect to Lists before the first sync brought it in; it now waits until that sync has finished.
+
 ## Proposed (not built)
 
 (Features that seem missing from the brief. Listed here, not built.)
