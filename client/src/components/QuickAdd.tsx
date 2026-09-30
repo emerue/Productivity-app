@@ -1,5 +1,13 @@
 import { isValidDateStr, parseQuickAdd, removeToken, type QuickAddToken } from '@frog/shared';
-import { forwardRef, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
+import {
+  forwardRef,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+  type KeyboardEvent,
+} from 'react';
 import { matchPath, useLocation, useSearchParams } from 'react-router-dom';
 import { createFromQuickAdd, liveLists, type QuickAddDefaults } from '../data/actions';
 import { useData } from '../data/store';
@@ -50,14 +58,35 @@ interface FieldProps {
   id?: string;
   onEscape?: () => void;
   hidden?: boolean;
+  /** Lets an outside button submit the form (see `submitQuickAdd`). */
+  formId?: string;
+  onTextChange?: (hasText: boolean) => void;
 }
 
-/** Input + live token chips. Enter adds and keeps focus for the next task. */
+/** Submits a form the way Enter would (requestSubmit is missing before iOS 16). */
+function submitForm(form: HTMLFormElement | null): void {
+  if (!form) return;
+  if (typeof form.requestSubmit === 'function') form.requestSubmit();
+  else form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+}
+
+/** Submits a quick-add form from a button outside it. */
+function submitQuickAdd(formId: string): void {
+  const form = document.getElementById(formId);
+  if (form instanceof HTMLFormElement) submitForm(form);
+}
+
+/**
+ * Input + live token chips, in a form so every mobile keyboard's Enter / Go / Done
+ * submits it. The keyboard keeps focus for the next task.
+ */
 const QuickAddField = forwardRef<HTMLInputElement, FieldProps>(function QuickAddField(
-  { id, onEscape, hidden },
+  { id, onEscape, hidden, formId, onTextChange },
   ref,
 ) {
   const [text, setText] = useState('');
+  const hasText = text.trim() !== '';
+  useEffect(() => onTextChange?.(hasText), [hasText, onTextChange]);
   const lists = useData((s) => s.lists);
   const defaultListId = useData((s) => s.settings.defaultListId);
   const today = useToday();
@@ -85,11 +114,23 @@ const QuickAddField = forwardRef<HTMLInputElement, FieldProps>(function QuickAdd
   const listFromToken = parsed.tokens.some((t) => t.kind === 'list' || t.kind === 'newList');
   const dueFromScreen = !parsed.due && defaults.due ? defaults.due : null;
 
+  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (createFromQuickAdd(parsed, { listId: chosenList, due: defaults.due, myDay })) setText('');
+  };
+
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+    if (e.key === 'Enter') {
+      // On a desktop IME, Enter while composing confirms the word, not the task.
+      // Phone keyboards (Gboard, iOS predictive) compose every word, so there the
+      // keyboard's return / Done key always adds.
+      const touch = window.matchMedia('(pointer: coarse)').matches;
+      if (e.nativeEvent.isComposing && !touch) return;
       e.preventDefault();
-      if (createFromQuickAdd(parsed, { listId: chosenList, due: defaults.due, myDay })) setText('');
-    } else if (e.key === 'Escape') {
+      submitForm(e.currentTarget.form);
+      return;
+    }
+    if (e.key === 'Escape') {
       e.preventDefault();
       e.currentTarget.blur();
       onEscape?.();
@@ -97,7 +138,7 @@ const QuickAddField = forwardRef<HTMLInputElement, FieldProps>(function QuickAdd
   };
 
   return (
-    <div className="quick-add__field">
+    <form className="quick-add__field" id={formId} onSubmit={onSubmit} noValidate>
       <label className="visually-hidden" htmlFor={id}>
         Add a task
       </label>
@@ -152,6 +193,7 @@ const QuickAddField = forwardRef<HTMLInputElement, FieldProps>(function QuickAdd
           {parsed.tokens.map((t) => (
             <li key={`${t.start}-${t.raw}`}>
               <button
+                type="button"
                 className="chip"
                 tabIndex={hidden ? -1 : undefined}
                 aria-label={`Remove ${chipLabel(t, today)}`}
@@ -166,7 +208,7 @@ const QuickAddField = forwardRef<HTMLInputElement, FieldProps>(function QuickAdd
           ))}
         </ul>
       )}
-    </div>
+    </form>
   );
 });
 
@@ -207,6 +249,7 @@ export function QuickAddMobile() {
     };
   }, [open]);
 
+  const [hasText, setHasText] = useState(false);
   const close = () => {
     useUI.setState({ quickAddOpen: false });
     inputRef.current?.blur();
@@ -231,13 +274,33 @@ export function QuickAddMobile() {
       >
         <div className="quick-sheet__scrim" onClick={close} />
         <div className="quick-sheet__panel" role="dialog" aria-label="Add a task">
-          <QuickAddField ref={inputRef} id="quick-add-mobile" onEscape={close} hidden={!open} />
+          <QuickAddField
+            ref={inputRef}
+            id="quick-add-mobile"
+            formId="quick-add-mobile-form"
+            onEscape={close}
+            hidden={!open}
+            onTextChange={setHasText}
+          />
+          {/*
+            Not a submit button: a form's default button is "clicked" by the keyboard's
+            Enter, which would close the sheet after every task.
+          */}
           <button
-            className="btn btn--text quick-sheet__done"
+            type="button"
+            className={
+              hasText ? 'btn btn--ink quick-sheet__done' : 'btn btn--text quick-sheet__done'
+            }
             tabIndex={open ? 0 : -1}
-            onClick={close}
+            // Keep focus in the input so the keyboard (and the panel above it) doesn't
+            // drop away mid-tap on iOS.
+            onPointerDown={(e) => e.preventDefault()}
+            onClick={() => {
+              if (hasText) submitQuickAdd('quick-add-mobile-form');
+              close();
+            }}
           >
-            Done
+            {hasText ? 'Add' : 'Done'}
           </button>
         </div>
       </div>
