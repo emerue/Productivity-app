@@ -1,4 +1,4 @@
-import { QUADRANT_LABEL, quadrantOf } from '@frog/shared';
+import { isInDay, QUADRANT_LABEL, quadrantOf } from '@frog/shared';
 import { useCallback, useEffect } from 'react';
 import {
   addToMyDay,
@@ -13,14 +13,15 @@ import {
 import { useData } from '../data/store';
 import { dismissToast, useUI } from '../data/ui';
 import { useTaskDetail } from '../lib/hooks';
-import { useToday } from '../lib/time';
 import { Modal } from './Modal';
+import { RepeatPicker } from './RepeatPicker';
+import { useUrgency } from '../lib/queries';
 
 function ActionsFor({ taskId }: { taskId: string }) {
   const task = useData((s) => s.tasks[taskId]);
   const lists = useData((s) => s.lists);
-  const urgencyWindowDays = useData((s) => s.settings.urgencyWindowDays);
-  const today = useToday();
+  const ctx = useUrgency();
+  const today = ctx.today;
   const day = useData((s) => s.days[today]);
   const { openTask } = useTaskDetail();
   const close = useCallback(() => useUI.setState({ actionsTaskId: null }), []);
@@ -28,8 +29,8 @@ function ActionsFor({ taskId }: { taskId: string }) {
 
   const done = task.status === 'done';
   const archived = task.status === 'archived';
-  const inMyDay = !!day && (day.frog === task.id || day.myDay.includes(task.id));
-  const quadrant = quadrantOf(task, { today, urgencyWindowDays });
+  const inMyDay = isInDay(day, task.id);
+  const quadrant = quadrantOf(task, ctx);
   const run = (fn: () => void) => () => {
     close();
     fn();
@@ -103,6 +104,14 @@ function ActionsFor({ taskId }: { taskId: string }) {
             </button>
           )}
         </li>
+        {!done && !archived && (
+          <li className="actions__repeat">
+            <label className="choice__label" htmlFor="actions-repeat">
+              Repeat
+            </label>
+            <RepeatPicker task={task} id="actions-repeat" />
+          </li>
+        )}
       </ul>
 
       <h3 className="actions__section">Move to list</h3>

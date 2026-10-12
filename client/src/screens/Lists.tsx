@@ -1,4 +1,4 @@
-import { isOpen, type Task } from '@frog/shared';
+import { isOpen } from '@frog/shared';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight, SearchIcon } from '../components/Icons';
@@ -7,6 +7,7 @@ import { TaskRow } from '../components/TaskRow';
 import { createList, liveLists } from '../data/actions';
 import { useData } from '../data/store';
 import { useVisibleTasks } from '../lib/keyboard';
+import { searchTasks } from '../lib/queries';
 import { useToday } from '../lib/time';
 
 function NewList() {
@@ -53,16 +54,7 @@ function NewList() {
 function SearchResults({ query }: { query: string }) {
   const tasks = useData((s) => s.tasks);
   const today = useToday();
-  const results = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const matches = Object.values(tasks).filter(
-      (t) => !t.deleted && (t.title.toLowerCase().includes(q) || t.notes.toLowerCase().includes(q)),
-    );
-    const rank = (t: Task) => (t.status === 'open' ? 0 : t.status === 'done' ? 1 : 2);
-    return matches
-      .sort((a, b) => rank(a) - rank(b) || b.updatedAt.localeCompare(a.updatedAt))
-      .slice(0, 100);
-  }, [tasks, query]);
+  const results = useMemo(() => searchTasks(tasks, query), [tasks, query]);
   useVisibleTasks(results.map((t) => t.id));
 
   if (results.length === 0) return <p className="empty">No tasks match “{query.trim()}”.</p>;

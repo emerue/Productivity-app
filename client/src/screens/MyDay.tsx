@@ -1,4 +1,4 @@
-import { addDays, isOpen, rankTasks, type DateStr, type Task } from '@frog/shared';
+import { dayOf, todayPlan, type DateStr, type Task } from '@frog/shared';
 import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FrogSlot } from '../components/FrogCard';
@@ -7,15 +7,12 @@ import { Menu } from '../components/Menu';
 import { PlanBanner } from '../components/PlanBanner';
 import { QuickAddInline } from '../components/QuickAdd';
 import { TaskRow } from '../components/TaskRow';
-import { addToMyDay, dayOf, makeFrog } from '../data/actions';
+import { addToMyDay, makeFrog } from '../data/actions';
 import { useData } from '../data/store';
 import { useUI } from '../data/ui';
 import { useTaskDetail } from '../lib/hooks';
 import { useVisibleTasks } from '../lib/keyboard';
 import { formatDue, formatHeaderDate, useToday } from '../lib/time';
-
-/** How far back "From earlier days" looks for unfinished My Day tasks. */
-const LEFTOVER_DAYS = 14;
 
 function PickFrog({ candidates }: { candidates: Task[] }) {
   return (
@@ -152,41 +149,10 @@ export function MyDayScreen() {
   const fullDayHint = useUI((s) => s.fullDayHint);
   const day = dayOf(today, days);
 
-  const view = useMemo(() => {
-    const live = (id: string | null) => {
-      const t = id ? tasks[id] : undefined;
-      return t && !t.deleted && t.status !== 'archived' ? t : null;
-    };
-    const frog = live(day.frog);
-    const planned = day.myDay.map(live).filter((t): t is Task => t !== null && t.id !== day.frog);
-    const rows = planned.filter((t) => t.status === 'open' || t.id in lingering);
-    const inDay = new Set([day.frog, ...day.myDay]);
-    const dueUnplanned = Object.values(tasks)
-      .filter((t) => isOpen(t) && t.due !== null && t.due <= today && !inDay.has(t.id))
-      .sort((a, b) => a.due!.localeCompare(b.due!) || a.createdAt.localeCompare(b.createdAt));
-    const completed = planned.filter((t) => t.status === 'done' && !(t.id in lingering));
-    const due = new Set(dueUnplanned.map((t) => t.id));
-    const from = addDays(today, -LEFTOVER_DAYS);
-    const earlierIds: string[] = [];
-    for (const d of Object.values(days).sort((a, b) => b.date.localeCompare(a.date))) {
-      if (d.date >= today || d.date < from) continue;
-      for (const id of [d.frog, ...d.myDay])
-        if (id && !earlierIds.includes(id)) earlierIds.push(id);
-    }
-    const earlier = earlierIds
-      .map((id) => tasks[id])
-      .filter((t): t is Task => !!t && isOpen(t) && !inDay.has(t.id) && !due.has(t.id));
-    const hasAnything = frog !== null || planned.length > 0;
-    const allDone =
-      hasAnything && (!frog || frog.status === 'done') && planned.every((t) => t.status !== 'open');
-    const candidates = frog
-      ? []
-      : rankTasks(Object.values(tasks), { target: today, settings: { urgencyWindowDays } })
-          .filter((t) => t.important)
-          .sort((a, b) => Number(inDay.has(b.id)) - Number(inDay.has(a.id)))
-          .slice(0, 3);
-    return { frog, rows, dueUnplanned, earlier, completed, hasAnything, allDone, candidates };
-  }, [tasks, day, days, today, lingering, urgencyWindowDays]);
+  const view = useMemo(
+    () => todayPlan(today, days, tasks, { urgencyWindowDays, lingering }),
+    [tasks, days, today, lingering, urgencyWindowDays],
+  );
 
   const { frog, rows, dueUnplanned, earlier, completed, hasAnything, allDone, candidates } = view;
   const frogOpen = frog?.status === 'open';

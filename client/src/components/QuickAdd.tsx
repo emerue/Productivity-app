@@ -1,4 +1,11 @@
-import { isValidDateStr, parseQuickAdd, removeToken, type QuickAddToken } from '@frog/shared';
+import {
+  isValidDateStr,
+  parseQuickAdd,
+  pickList,
+  removeToken,
+  repeatShort,
+  type QuickAddToken,
+} from '@frog/shared';
 import {
   forwardRef,
   useEffect,
@@ -33,6 +40,8 @@ function chipLabel(t: QuickAddToken, today: string): string {
       return 'My Day';
     case 'waiting':
       return `Waiting on ${t.name}`;
+    case 'repeat':
+      return `Repeats ${repeatShort(t.rule).toLowerCase()}`;
   }
 }
 
@@ -107,9 +116,8 @@ const QuickAddField = forwardRef<HTMLInputElement, FieldProps>(function QuickAdd
   }, [screenList, screenMyDay]);
 
   const live = liveLists(lists);
-  const fallbackList = live.find((l) => l.id === defaultListId) ?? live[0];
-  const chosenList =
-    live.find((l) => l.id === (listPick ?? screenList))?.id ?? fallbackList?.id ?? '';
+  // Same order createFromQuickAdd uses, so the picker shows where the task lands.
+  const chosenList = pickList(lists, [listPick, screenList, defaultListId])?.id ?? '';
   const myDay = myDayPick ?? screenMyDay;
   const listFromToken = parsed.tokens.some((t) => t.kind === 'list' || t.kind === 'newList');
   const dueFromScreen = !parsed.due && defaults.due ? defaults.due : null;

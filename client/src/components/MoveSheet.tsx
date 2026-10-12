@@ -6,6 +6,7 @@ import { showToast, useUI } from '../data/ui';
 import { useTaskDetail } from '../lib/hooks';
 import { formatDueInline, useToday } from '../lib/time';
 import { Modal } from './Modal';
+import { useUrgency } from '../lib/queries';
 
 /**
  * Moves a task and handles the follow-ups: Delegate focuses "Waiting on";
@@ -24,12 +25,11 @@ export function useMoveTask() {
 
 function MoveChooser({ taskId }: { taskId: string }) {
   const task = useData((s) => s.tasks[taskId]);
-  const urgencyWindowDays = useData((s) => s.settings.urgencyWindowDays);
-  const today = useToday();
+  const ctx = useUrgency();
   const move = useMoveTask();
   const close = useCallback(() => useUI.setState({ moveTaskId: null }), []);
   if (!task) return null;
-  const current = quadrantOf(task, { today, urgencyWindowDays });
+  const current = quadrantOf(task, ctx);
 
   return (
     <Modal label="Move to" onClose={close}>

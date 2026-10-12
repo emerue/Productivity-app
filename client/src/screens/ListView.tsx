@@ -1,11 +1,4 @@
-import {
-  QUADRANT_LABEL,
-  QUADRANTS,
-  quadrantOf,
-  type List,
-  type Quadrant,
-  type Task,
-} from '@frog/shared';
+import { QUADRANT_LABEL, QUADRANTS, type List } from '@frog/shared';
 import { useCallback, useMemo, useState } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from '../components/Icons';
@@ -16,7 +9,7 @@ import { TaskRow } from '../components/TaskRow';
 import { deleteList, liveLists, renameList, unarchive } from '../data/actions';
 import { useData } from '../data/store';
 import { askConfirm, useUI } from '../data/ui';
-import { rankWithLingering } from '../lib/format';
+import { closedTasks, rankByQuadrant, useUrgency } from '../lib/queries';
 import { useIsDesktop, useTaskDetail } from '../lib/hooks';
 import { useVisibleTasks } from '../lib/keyboard';
 import { readTaskSort, sortTasks, TASK_SORTS, writeTaskSort, type TaskSort } from '../lib/sort';
@@ -190,7 +183,7 @@ function OneList({ list }: { list: List }) {
   const isDesktop = useIsDesktop();
   const tasks = useData((s) => s.tasks);
   const lingering = useUI((s) => s.lingering);
-  const urgencyWindowDays = useData((s) => s.settings.urgencyWindowDays);
+  const ctx = useUrgency();
   const [showDone, setShowDone] = useState(false);
   const [sort, setSort] = useState<TaskSort>(readTaskSort);
   const changeSort = (next: TaskSort) => {
@@ -199,17 +192,14 @@ function OneList({ list }: { list: List }) {
   };
 
   const { groups, flat, done, total } = useMemo(() => {
-    const ctx = { today, urgencyWindowDays };
     const inList = Object.values(tasks).filter((t) => !t.deleted && t.listId === list.id);
-    const g: Record<Quadrant, Task[]> = { do: [], schedule: [], delegate: [], drop: [] };
-    const ranked = rankWithLingering(inList, lingering, { target: today, settings: ctx });
-    for (const t of ranked) g[quadrantOf(t, ctx)].push(t);
+    const { ranked, groups: g } = rankByQuadrant(inList, lingering, ctx);
     const f = sort === 'priority' ? ranked : sortTasks(ranked, sort);
     const d = inList
       .filter((t) => t.status === 'done')
       .sort((a, b) => (b.completedAt ?? '').localeCompare(a.completedAt ?? ''));
     return { groups: g, flat: f, done: d, total: inList.length };
-  }, [tasks, list.id, today, urgencyWindowDays, lingering, sort]);
+  }, [tasks, list.id, ctx, lingering, sort]);
 
   const openCount = flat.filter((t) => t.status === 'open').length;
   useVisibleTasks([
@@ -282,17 +272,7 @@ function ClosedTasks({ status }: { status: 'done' | 'archived' }) {
   const tasks = useData((s) => s.tasks);
   const lists = useData((s) => s.lists);
   const { openTask } = useTaskDetail();
-  const items = useMemo(
-    () =>
-      Object.values(tasks)
-        .filter((t) => !t.deleted && t.status === status)
-        .sort((a, b) =>
-          status === 'done'
-            ? (b.completedAt ?? '').localeCompare(a.completedAt ?? '')
-            : b.updatedAt.localeCompare(a.updatedAt),
-        ),
-    [tasks, status],
-  );
+  const items = useMemo(() => closedTasks(tasks, status), [tasks, status]);
   useVisibleTasks(status === 'done' ? items.map((t) => t.id) : []);
   const title = status === 'done' ? 'Completed' : 'Archived';
 

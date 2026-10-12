@@ -1,4 +1,11 @@
-import { isOverdue, nextAction, stepProgress, type DateStr, type Task } from '@frog/shared';
+import {
+  isOverdue,
+  nextAction,
+  repeatShort,
+  stepProgress,
+  type DateStr,
+  type Task,
+} from '@frog/shared';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { reopen } from '../data/actions';
@@ -22,6 +29,7 @@ function FrogCard({ task, today }: FrogProps) {
   const meta = [
     steps.total > 0 ? `${steps.done}/${steps.total}` : null,
     task.due ? formatDue(task.due, today) : null,
+    task.repeat ? `↻ ${repeatShort(task.repeat)}` : null,
   ].filter(Boolean);
   const overdue = isOverdue(task, today);
   const done = task.status === 'done';

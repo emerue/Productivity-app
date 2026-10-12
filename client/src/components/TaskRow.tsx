@@ -1,5 +1,7 @@
 import {
   hasNotes,
+  isInDay,
+  repeatLabel,
   isOverdue,
   quadrantOf,
   stepProgress,
@@ -16,7 +18,8 @@ import { taskSubtitle } from '../lib/format';
 import { useTaskDetail } from '../lib/hooks';
 import { formatDue } from '../lib/time';
 import { CheckCircle } from './CheckCircle';
-import { MoreIcon, NoteIcon, PlayIcon } from './Icons';
+import { MoreIcon, NoteIcon, PlayIcon, RepeatIcon } from './Icons';
+import { useUrgency } from '../lib/queries';
 
 interface TaskRowProps {
   task: Task;
@@ -43,11 +46,11 @@ export const TaskRow = memo(function TaskRow({
 }: TaskRowProps) {
   const navigate = useNavigate();
   const { openTask } = useTaskDetail();
-  const urgencyWindowDays = useData((s) => s.settings.urgencyWindowDays);
+  const ctx = useUrgency();
   const selected = useUI((s) => s.selectedTaskId === task.id);
   const lingering = useUI((s) => task.id in s.lingering);
   const listName = useData((s) => (showList ? s.lists[task.listId]?.name : undefined));
-  const quadrant = quadrantOf(task, { today, urgencyWindowDays });
+  const quadrant = quadrantOf(task, { ...ctx, today });
   const subtitle = taskSubtitle(task, quadrant, today);
   const steps = stepProgress(task);
   const done = task.status === 'done';
@@ -132,10 +135,7 @@ export const TaskRow = memo(function TaskRow({
     setDx(0);
   };
   const start = () => navigate(`/focus/${task.id}`);
-  const inDayNow = useData((s) => {
-    const d = s.days[today];
-    return !!d && (d.frog === task.id || d.myDay.includes(task.id));
-  });
+  const inDayNow = useData((s) => isInDay(s.days[today], task.id));
   const inDay = inMyDay ?? inDayNow;
 
   return (
@@ -211,6 +211,12 @@ export const TaskRow = memo(function TaskRow({
           {task.due && !done && (
             <span className={overdue ? 'row__due is-overdue' : 'row__due'}>
               {formatDue(task.due, today)}
+              {task.repeat && (
+                <span className="row__repeat" title={repeatLabel(task.repeat)}>
+                  <RepeatIcon />
+                  <span className="visually-hidden">, repeats {repeatLabel(task.repeat)}</span>
+                </span>
+              )}
             </span>
           )}
           {steps.total > 0 && (

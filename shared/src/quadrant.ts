@@ -43,6 +43,16 @@ export function quadrantOf(
   return urgent ? 'delegate' : 'drop';
 }
 
+/** Tasks by quadrant, keeping their order. */
+export function groupByQuadrant<T extends UrgencyFields & Pick<Task, 'important'>>(
+  tasks: Iterable<T>,
+  ctx: UrgencyContext,
+): Record<Quadrant, T[]> {
+  const groups: Record<Quadrant, T[]> = { do: [], schedule: [], delegate: [], drop: [] };
+  for (const t of tasks) groups[quadrantOf(t, ctx)].push(t);
+  return groups;
+}
+
 /** Flags a manual move sets. */
 export function flagsForQuadrant(q: Quadrant): Pick<Task, 'important' | 'urgentFlag'> {
   switch (q) {

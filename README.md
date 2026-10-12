@@ -27,4 +27,6 @@ See [deploy/DEPLOY.md](deploy/DEPLOY.md). Short version: `deploy/deploy.sh`.
 - `client/`: React PWA
 - `deploy/`: systemd unit, Nginx template, deploy scripts
 
-Background: [PLAN.md](PLAN.md) (milestones) and [DECISIONS.md](DECISIONS.md) (calls made along the way).
+Docs: [docs/PRD.md](docs/PRD.md) (what Frog does and why, feature status, backlog) and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) (how it's built). Both are living documents: update them in the same commit as the change.
+
+Background: [PLAN.md](PLAN.md) (original milestones) and [DECISIONS.md](DECISIONS.md) (calls made along the way).

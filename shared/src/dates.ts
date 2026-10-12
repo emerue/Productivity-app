@@ -45,6 +45,11 @@ export function weekdayOf(s: DateStr): number {
   return parseDateStr(s).getUTCDay();
 }
 
+/** Monday of the week containing `s` (weeks start on Monday). */
+export function weekStart(s: DateStr): DateStr {
+  return addDays(s, -((weekdayOf(s) + 6) % 7));
+}
+
 export interface LocalParts {
   date: DateStr;
   hour: number;

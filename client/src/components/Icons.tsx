@@ -170,3 +170,15 @@ export function CalendarIcon({ size = 22, className }: IconProps) {
     </svg>
   );
 }
+
+/** Repeat (↻): two arrows chasing round. */
+export function RepeatIcon({ size = 14, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className}>
+      <path d="M4.5 11a7.5 7.5 0 0 1 13-5.1L20 8.5" {...stroke} />
+      <path d="M20 4v4.5h-4.5" {...stroke} />
+      <path d="M19.5 13a7.5 7.5 0 0 1-13 5.1L4 15.5" {...stroke} />
+      <path d="M4 20v-4.5h4.5" {...stroke} />
+    </svg>
+  );
+}

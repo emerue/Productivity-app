@@ -1,12 +1,23 @@
-import { addDays, diffDays, isOpen, isValidDateStr, type DateStr } from '@frog/shared';
+import {
+  addDays,
+  diffDays,
+  isOpen,
+  isValidDateStr,
+  quadrantOf,
+  repeatShort,
+  type DateStr,
+  type Task,
+} from '@frog/shared';
 import { useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ChevronLeft, ChevronRight } from '../components/Icons';
+import { ChevronLeft, ChevronRight, RepeatIcon } from '../components/Icons';
 import { QuickAddInline } from '../components/QuickAdd';
 import { TaskRow } from '../components/TaskRow';
 import { useData } from '../data/store';
 import { buildAgenda, weekStart } from '../lib/agenda';
+import { useTaskDetail } from '../lib/hooks';
 import { useVisibleTasks } from '../lib/keyboard';
+import { overdueTasks, useUrgency } from '../lib/queries';
 import { formatDateLong, formatHeaderDate, useToday } from '../lib/time';
 
 type View = 'day' | 'week';
@@ -28,6 +39,32 @@ function rangeLabel(view: View, start: DateStr, today: DateStr): string {
   return `${fmt(start)} – ${fmt(end)}${year}`;
 }
 
+/**
+ * A future occurrence of a repeating task: quiet, no checkbox; opens the live
+ * task. Its quadrant is the one the task will have when it falls due on `date`.
+ */
+function UpcomingRow({ task, date }: { task: Task; date: DateStr }) {
+  const { openTask } = useTaskDetail();
+  const ctx = useUrgency();
+  const list = useData((s) => s.lists[task.listId]?.name);
+  return (
+    <li>
+      <button
+        className="ghost"
+        data-q={quadrantOf({ ...task, due: date }, ctx)}
+        onClick={() => openTask(task.id)}
+      >
+        <RepeatIcon className="ghost__icon" />
+        <span className="ghost__title">{task.title}</span>
+        <span className="ghost__meta">
+          {list && <span className="row__list">{list}</span>}
+          <span>{repeatShort(task.repeat!)}</span>
+        </span>
+      </button>
+    </li>
+  );
+}
+
 export function AgendaScreen() {
   const today = useToday();
   const [params, setParams] = useSearchParams();
@@ -44,12 +81,7 @@ export function AgendaScreen() {
 
   const agenda = useMemo(() => buildAgenda(start, count, tasks, days), [start, count, tasks, days]);
   const overdue = useMemo(
-    () =>
-      includesToday
-        ? Object.values(tasks)
-            .filter((t) => isOpen(t) && t.due !== null && t.due < today)
-            .sort((a, b) => a.due!.localeCompare(b.due!) || a.title.localeCompare(b.title))
-        : [],
+    () => (includesToday ? overdueTasks(tasks, today) : []),
     [tasks, today, includesToday],
   );
 
@@ -160,13 +192,21 @@ export function AgendaScreen() {
               <span className="agenda__count num">{d.tasks.filter(isOpen).length}</span>
             )}
           </h2>
-          {d.tasks.length > 0 ? (
+          {d.tasks.length > 0 && (
             <div className={view === 'week' ? 'rows scroll-box' : 'rows'} role="list">
               {d.tasks.map((t) => (
                 <TaskRow key={t.id} task={t} today={today} edge showList />
               ))}
             </div>
-          ) : (
+          )}
+          {d.upcoming.length > 0 && (
+            <ul className="ghosts" aria-label="Repeating, coming up">
+              {d.upcoming.map((t) => (
+                <UpcomingRow key={t.id} task={t} date={d.date} />
+              ))}
+            </ul>
+          )}
+          {d.tasks.length === 0 && d.upcoming.length === 0 && (
             <p className="agenda__empty">Nothing due or planned.</p>
           )}
         </section>

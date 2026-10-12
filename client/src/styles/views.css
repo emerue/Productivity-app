@@ -490,3 +490,16 @@
 .agenda .scroll-box {
   max-height: min(45dvh, 17.5rem);
 }
+
+.actions__repeat {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 8px 12px;
+  padding: 10px 4px;
+  border-top: 1px solid var(--line);
+}
+
+.actions__repeat > .choice__label {
+  padding-top: 10px;
+}

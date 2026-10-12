@@ -1,6 +1,7 @@
 import {
   archiveTask,
   COMPLETED_ARCHIVE_DAYS,
+  daysWithout,
   logicalDate,
   shouldAutoArchive,
   TOMBSTONE_TTL_DAYS,
@@ -58,10 +59,19 @@ export function autoArchiveDrop(manager: StoreManager, now: Date = new Date()): 
     .filter((t) => shouldAutoArchive(t, ctx))
     .map((t) => t.id);
   if (ids.length === 0) return 0;
+  // Archived tasks also leave today's and future My Days, as on the client.
+  const days = new Set<string>();
   manager.mutate((store) => {
-    for (const id of ids) store.tasks[id] = archiveTask(store.tasks[id]!, iso);
+    for (const id of ids) {
+      store.tasks[id] = archiveTask(store.tasks[id]!, iso);
+      for (const d of daysWithout(store.days, id, ctx.today, iso)) {
+        store.days[d.date] = d;
+        days.add(d.date);
+      }
+    }
   });
   for (const id of ids) manager.stamp('tasks', id);
+  for (const date of days) manager.stamp('days', date);
   return ids.length;
 }
 

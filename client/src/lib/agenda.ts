@@ -1,13 +1,21 @@
-import { addDays, isOpen, weekdayOf, type DateStr, type Day, type Task } from '@frog/shared';
+import {
+  addDays,
+  dayTaskIds,
+  isOccurrence,
+  isOpen,
+  isVisible,
+  type DateStr,
+  type Day,
+  type Task,
+} from '@frog/shared';
 
-/** Monday of the week containing `date`. */
-export function weekStart(date: DateStr): DateStr {
-  return addDays(date, -((weekdayOf(date) + 6) % 7));
-}
+export { weekStart } from '@frog/shared';
 
 export interface AgendaDay {
   date: DateStr;
   tasks: Task[];
+  /** Future occurrences of repeating tasks (not real tasks yet), by title. */
+  upcoming: Task[];
 }
 
 /**
@@ -21,22 +29,27 @@ export function buildAgenda(
   tasks: Record<string, Task>,
   days: Record<string, Day>,
 ): AgendaDay[] {
-  const all = Object.values(tasks).filter((t) => !t.deleted && t.status !== 'archived');
+  const all = Object.values(tasks).filter(isVisible);
+  const repeating = all.filter((t) => isOpen(t) && t.repeat && t.due);
   return Array.from({ length: count }, (_, i) => {
     const date = addDays(start, i);
     const day = days[date];
     const seen = new Set<string>();
     const picked: Task[] = [];
     const add = (t: Task | undefined) => {
-      if (!t || t.deleted || t.status === 'archived' || seen.has(t.id)) return;
+      if (!isVisible(t) || seen.has(t.id)) return;
       seen.add(t.id);
       picked.push(t);
     };
-    if (day) [day.frog, ...day.myDay].forEach((id) => id && add(tasks[id]));
+    dayTaskIds(day).forEach((id) => add(tasks[id]));
     all.filter((t) => t.due === date).forEach(add);
     all.filter((t) => isOpen(t) && t.followUp === date).forEach(add);
     const rank = (t: Task) => (t.status === 'open' ? (day?.frog === t.id ? 0 : 1) : 2);
     picked.sort((a, b) => rank(a) - rank(b) || a.title.localeCompare(b.title));
-    return { date, tasks: picked };
+    // The live task sits on its due date; later occurrences are previews.
+    const upcoming = repeating
+      .filter((t) => date > t.due! && !seen.has(t.id) && isOccurrence(t.repeat!, date))
+      .sort((a, b) => a.title.localeCompare(b.title));
+    return { date, tasks: picked, upcoming };
   });
 }

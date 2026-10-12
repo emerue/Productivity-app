@@ -1,4 +1,4 @@
-import { isOpen } from '@frog/shared';
+import { isOpen, plannedCount } from '@frog/shared';
 import { useEffect, useMemo } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { liveLists, makeFrog, removeTask } from '../data/actions';
@@ -32,9 +32,7 @@ function useOpenCounts() {
     const byList: Record<string, number> = {};
     for (const t of Object.values(tasks))
       if (isOpen(t)) byList[t.listId] = (byList[t.listId] ?? 0) + 1;
-    const ids = day ? [day.frog, ...day.myDay] : [];
-    const myDay = new Set(ids.filter((id) => id && tasks[id] && isOpen(tasks[id]))).size;
-    return { byList, myDay };
+    return { byList, myDay: day ? plannedCount(day, tasks) : 0 };
   }, [tasks, day]);
 }
 

@@ -1036,3 +1036,140 @@ select.meta-input {
 .menu__item:disabled {
   color: var(--ink-3);
 }
+
+/* ---------------------------------------------------------------------------
+   Repeating tasks
+   ------------------------------------------------------------------------ */
+
+.row__repeat {
+  display: inline-flex;
+  vertical-align: -2px;
+  margin-left: 4px;
+  color: var(--ink-3);
+}
+
+.repeat {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.repeat__custom {
+  display: grid;
+  gap: 8px;
+}
+
+.repeat__every {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-2);
+  font-size: var(--fs-meta);
+}
+
+.repeat__every .meta-input {
+  width: auto;
+  min-height: 36px;
+}
+
+.repeat__n {
+  width: 4.5rem;
+}
+
+.repeat__days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* The custom editor needs the full width of the details grid. */
+.meta-field:has(.repeat__custom) {
+  grid-column: 1 / -1;
+}
+
+.meta-field dd {
+  min-width: 0;
+}
+
+.repeat__day {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: var(--fs-meta);
+  font-weight: 500;
+}
+
+.repeat__day[aria-pressed='true'] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.repeat__summary {
+  display: none;
+}
+
+/* Custom repeats get a plain-language summary under the editor. */
+.repeat__custom + .repeat__summary {
+  display: block;
+  color: var(--ink-2);
+  font-size: var(--fs-meta);
+}
+
+/* Upcoming occurrences in the Agenda: previews, quieter than real tasks. */
+.ghosts {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ghost {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 0 0 12px;
+  border-bottom: 1px dashed var(--line);
+  border-left: 2px dashed color-mix(in srgb, var(--q-color) 45%, transparent);
+  color: var(--ink-2);
+  text-align: left;
+}
+
+.ghost:hover {
+  color: var(--ink);
+}
+
+.ghost__icon {
+  flex: none;
+  color: var(--ink-3);
+}
+
+.ghost__title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: var(--fs-body);
+}
+
+.ghost__meta {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+}
+
+@media (max-width: 420px) {
+  .ghost__meta .row__list {
+    display: none;
+  }
+}

@@ -1,7 +1,8 @@
 import { HISTORY_CAP } from './constants.js';
-import { diffDays, type DateStr } from './dates.js';
+import { addDays, diffDays, type DateStr } from './dates.js';
 import { newId } from './ids.js';
 import { flagsForQuadrant, quadrantOf, type Quadrant, type UrgencyContext } from './quadrant.js';
+import { makeRepeat, nextDue, type RepeatRule } from './repeat.js';
 import type { HistoryEvent, HistoryEventType, List, Subtask, Task } from './schema.js';
 
 type EventData = NonNullable<HistoryEvent['data']>;
@@ -11,6 +12,11 @@ type EventData = NonNullable<HistoryEvent['data']>;
 
 export function isOpen(task: Task): boolean {
   return !task.deleted && task.status === 'open';
+}
+
+/** Shown anywhere: not deleted and not archived (open or done). */
+export function isVisible(task: Task | undefined): task is Task {
+  return !!task && !task.deleted && task.status !== 'archived';
 }
 
 /** Non-deleted steps in display order. */
@@ -71,6 +77,7 @@ export interface NewTaskInput {
   due?: DateStr | null;
   waitingOn?: string | null;
   followUp?: DateStr | null;
+  repeat?: Task['repeat'];
 }
 
 export function newTask(input: NewTaskInput, now: string): Task {
@@ -92,7 +99,51 @@ export function newTask(input: NewTaskInput, now: string): Task {
     updatedAt: now,
     rev: 0,
     history: [makeEvent('created', now)],
+    ...(input.repeat ? { repeat: input.repeat } : {}),
   };
+}
+
+/**
+ * Completes a repeating task and builds the next one in its series: same title,
+ * list, flags, notes and steps (unticked), due on the next occurrence that isn't
+ * in the past. The completed one leaves the series (`repeat: null`).
+ */
+export function completeRepeating(
+  task: Task,
+  today: DateStr,
+  now: string,
+): { done: Task; next: Task } | null {
+  if (!task.repeat || task.status !== 'open') return null;
+  const due = nextDue(task.repeat, task.due, today);
+  const shift = task.due ? diffDays(due, task.due) : 0;
+  const base = newTask(
+    {
+      title: task.title,
+      listId: task.listId,
+      important: task.important,
+      urgentFlag: task.urgentFlag,
+      due,
+      waitingOn: task.waitingOn,
+      followUp: task.followUp ? addDays(task.followUp, shift) : null,
+      repeat: task.repeat,
+    },
+    now,
+  );
+  const next: Task = {
+    ...base,
+    notes: task.notes,
+    subtasks: liveSubtasks(task).map((st, i) => ({
+      id: newId('s'),
+      title: st.title,
+      done: false,
+      doneAt: null,
+      order: i,
+      updatedAt: now,
+    })),
+    history: [makeEvent('created', now, { repeatOf: task.id })],
+  };
+  const done = completeTask({ ...task, repeat: null }, now);
+  return { done, next };
 }
 
 export function newList(name: string, order: number, now: string): List {
@@ -102,15 +153,46 @@ export function newList(name: string, order: number, now: string): List {
 // ---------------------------------------------------------------------------
 // Task operations (pure; return a new task)
 
-/** Scalar field edit. Bumps `updatedAt`. */
+/**
+ * Scalar field edit. Bumps `updatedAt`.
+ *
+ * Every edit keeps the repeat rule: a repeat counts from a date, so an edit
+ * that leaves a repeating task without a due date (clearing it, Drop) ends the
+ * series. Changing the due date keeps the anchor, so the pattern holds.
+ */
 export function patchTask(
   task: Task,
   patch: Partial<
-    Pick<Task, 'title' | 'listId' | 'important' | 'urgentFlag' | 'due' | 'waitingOn' | 'followUp'>
+    Pick<
+      Task,
+      'title' | 'listId' | 'important' | 'urgentFlag' | 'due' | 'waitingOn' | 'followUp' | 'repeat'
+    >
   >,
   now: string,
 ): Task {
-  return { ...task, ...patch, updatedAt: now };
+  const next = { ...task, ...patch, updatedAt: now };
+  return next.repeat && !next.due ? { ...next, repeat: null } : next;
+}
+
+/**
+ * Sets or clears a task's repeat. The rule is anchored on the due date; an
+ * undated task is dated `today` first.
+ */
+export function setTaskRepeat(
+  task: Task,
+  rule: RepeatRule | null,
+  today: DateStr,
+  now: string,
+): Task {
+  if (!rule) return task.repeat ? patchTask(task, { repeat: null }, now) : task;
+  const due = task.due ?? today;
+  return patchTask(task, { due, repeat: makeRepeat(rule, due) }, now);
+}
+
+/** Puts a task completed by `completeRepeating` back: open, with its repeat. */
+export function undoCompleteRepeating(done: Task, repeat: Task['repeat'], now: string): Task {
+  const reopened = reopenTask(done, now);
+  return reopened.due && repeat ? { ...reopened, repeat } : reopened;
 }
 
 export function completeTask(task: Task, now: string): Task {

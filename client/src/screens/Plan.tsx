@@ -1,6 +1,9 @@
 import {
   addDays,
+  dayOf,
+  dayTaskIds,
   isOpen,
+  leftovers,
   liveSubtasks,
   nextAction,
   postponeCount,
@@ -15,7 +18,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CheckCircle } from '../components/CheckCircle';
 import { CloseIcon, FrogGlyph } from '../components/Icons';
 import { StepsEditor } from '../components/StepsEditor';
-import { carryForward, dayOf, dropFromPlan, finishPlan, reschedule } from '../data/actions';
+import { carryForward, dropFromPlan, finishPlan, reschedule } from '../data/actions';
 import { useData } from '../data/store';
 import { formatDue, useToday } from '../lib/time';
 
@@ -108,12 +111,9 @@ export function PlanScreen() {
   // Snapshot the inputs once, so the lists don't shift while planning.
   const [initial] = useState(() => {
     const source = mode === 'today' ? addDays(today, -1) : today;
-    const src = dayOf(source, days);
-    const leftover = [src.frog, ...src.myDay].filter((id): id is string => !!id && open(tasks[id]));
-    const existing = dayOf(target, days);
     return {
-      leftover: [...new Set(leftover)],
-      existing: [existing.frog, ...existing.myDay].filter(Boolean) as string[],
+      leftover: leftovers(source, days, tasks),
+      existing: dayTaskIds(days[target]),
     };
   });
 

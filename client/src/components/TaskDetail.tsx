@@ -1,4 +1,4 @@
-import { QUADRANT_LABEL, quadrantOf, type Task } from '@frog/shared';
+import { isInDay, QUADRANT_LABEL, quadrantOf, type Task } from '@frog/shared';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -20,8 +20,10 @@ import { CheckCircle } from './CheckCircle';
 import { CloseIcon } from './Icons';
 import { Menu } from './Menu';
 import { NotesField } from './NotesField';
+import { RepeatPicker } from './RepeatPicker';
 import { Sheet } from './Sheet';
 import { StepsEditor } from './StepsEditor';
+import { useUrgency } from '../lib/queries';
 
 function TitleField({ task }: { task: Task }) {
   const [title, setTitle] = useState(task.title);
@@ -76,11 +78,11 @@ function DetailBody({
   const navigate = useNavigate();
   const { params } = useTaskDetail();
   const today = useToday();
-  const settings = useData((s) => s.settings);
   const lists = useData((s) => s.lists);
   const day = useData((s) => s.days[today]);
-  const quadrant = quadrantOf(task, { today, urgencyWindowDays: settings.urgencyWindowDays });
-  const inMyDay = !!day && (day.myDay.includes(task.id) || day.frog === task.id);
+  const urgency = useUrgency();
+  const quadrant = quadrantOf(task, urgency);
+  const inMyDay = isInDay(day, task.id);
   const isFrog = day?.frog === task.id;
   const waitingRef = useRef<HTMLInputElement>(null);
   const focusField = params.get('focus');
@@ -156,6 +158,16 @@ function DetailBody({
               />
             </dd>
           </div>
+          {!archived && (
+            <div className="meta-field">
+              <dt>
+                <label htmlFor="detail-repeat">Repeat</label>
+              </dt>
+              <dd>
+                <RepeatPicker task={task} id="detail-repeat" />
+              </dd>
+            </div>
+          )}
           <div className="meta-field">
             <dt>Quadrant</dt>
             <dd>

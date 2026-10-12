@@ -1,4 +1,5 @@
 import { addDays, diffDays, makeDateStr, weekdayOf, type DateStr } from './dates.js';
+import { presetRule, type RepeatRule } from './repeat.js';
 import type { List } from './schema.js';
 
 export type QuickAddToken = { raw: string; start: number; end: number } & (
@@ -10,6 +11,7 @@ export type QuickAddToken = { raw: string; start: number; end: number } & (
   | { kind: 'due'; date: DateStr }
   | { kind: 'myDay' }
   | { kind: 'waiting'; name: string }
+  | { kind: 'repeat'; rule: RepeatRule }
 );
 
 export interface QuickAddResult {
@@ -22,6 +24,8 @@ export interface QuickAddResult {
   newListName: string | null;
   addToMyDay: boolean;
   waitingOn: string | null;
+  /** From `*daily`, `*weekly`, `*2w`…; anchored to the due date (or today) when created. */
+  repeat: RepeatRule | null;
   tokens: QuickAddToken[];
 }
 
@@ -89,6 +93,25 @@ export function parseDueToken(word: string, today: DateStr): DateStr | null {
   return null;
 }
 
+const REPEAT_WORDS = ['daily', 'weekdays', 'weekly', 'monthly', 'yearly'] as const;
+const REPEAT_UNIT = { d: 'day', w: 'week', m: 'month', y: 'year' } as const;
+
+/** `daily`, `weekdays`, `weekly`, `monthly`, `yearly`, or `<n>d|w|m|y` ("2w" = every 2 weeks). */
+export function parseRepeatToken(word: string, today: DateStr): RepeatRule | null {
+  const w = word.toLowerCase();
+  const preset = REPEAT_WORDS.find((p) => p === w);
+  if (preset) {
+    const rule = presetRule(preset, today);
+    // Weekly takes its weekday from the due date when the task is created.
+    return preset === 'weekly' ? { unit: 'week', every: 1 } : rule;
+  }
+  const m = /^(\d{1,3})([dwmy])$/.exec(w);
+  if (!m) return null;
+  const every = Number(m[1]);
+  if (every < 1 || every > 365) return null;
+  return { unit: REPEAT_UNIT[m[2] as keyof typeof REPEAT_UNIT], every };
+}
+
 function matchList(name: string, lists: List[]): List | null {
   const q = name.toLowerCase();
   const live = lists.filter((l) => !l.deleted).sort((a, b) => a.order - b.order);
@@ -114,6 +137,7 @@ export function parseQuickAdd(input: string, ctx: QuickAddContext): QuickAddResu
     newListName: null,
     addToMyDay: false,
     waitingOn: null,
+    repeat: null,
     tokens: [],
   };
   const titleWords: string[] = [];
@@ -137,6 +161,9 @@ export function parseQuickAdd(input: string, ctx: QuickAddContext): QuickAddResu
     } else if (raw.length > 1 && raw.startsWith('^')) {
       const date = parseDueToken(raw.slice(1), ctx.today);
       if (date) token = { ...pos, kind: 'due', date };
+    } else if (raw.length > 1 && raw.startsWith('*')) {
+      const rule = parseRepeatToken(raw.slice(1), ctx.today);
+      if (rule) token = { ...pos, kind: 'repeat', rule };
     } else if (raw.length > 1 && raw.startsWith('>')) {
       token = { ...pos, kind: 'waiting', name: raw.slice(1) };
     }
@@ -167,6 +194,9 @@ export function parseQuickAdd(input: string, ctx: QuickAddContext): QuickAddResu
         break;
       case 'waiting':
         result.waitingOn = t.name;
+        break;
+      case 'repeat':
+        result.repeat = t.rule;
         break;
       default:
         break;

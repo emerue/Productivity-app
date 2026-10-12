@@ -63,6 +63,16 @@ export const SubtaskSchema = z.object({
   deletedAt: isoDateTime.optional(),
 });
 
+export const REPEAT_UNITS = ['day', 'week', 'month', 'year'] as const;
+
+/** A repeating series: every `every` units from `anchor`; weeks can pick weekdays (0 = Sun). */
+export const RepeatSchema = z.object({
+  unit: z.enum(REPEAT_UNITS),
+  every: z.number().int().min(1).max(365),
+  weekdays: z.array(z.number().int().min(0).max(6)).min(1).max(7).optional(),
+  anchor: dateStr,
+});
+
 export const TaskSchema = z.object({
   id: TaskId,
   title: z.string().max(1000),
@@ -81,6 +91,8 @@ export const TaskSchema = z.object({
   updatedAt: isoDateTime,
   rev,
   history: z.array(HistoryEventSchema).max(1000),
+  /** Optional so stores written before repeats existed still validate. */
+  repeat: RepeatSchema.nullable().optional(),
   deleted: z.boolean().optional(),
   deletedAt: isoDateTime.optional(),
   restore: z.boolean().optional(),
@@ -180,6 +192,8 @@ export type List = z.infer<typeof ListSchema>;
 export type HistoryEventType = (typeof HISTORY_EVENT_TYPES)[number];
 export type HistoryEvent = z.infer<typeof HistoryEventSchema>;
 export type Subtask = z.infer<typeof SubtaskSchema>;
+export type RepeatUnit = (typeof REPEAT_UNITS)[number];
+export type Repeat = z.infer<typeof RepeatSchema>;
 export type Task = z.infer<typeof TaskSchema>;
 export type Day = z.infer<typeof DaySchema>;
 export type FocusSession = z.infer<typeof FocusSessionSchema>;

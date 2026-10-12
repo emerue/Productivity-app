@@ -9,14 +9,7 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from '@dnd-kit/core';
-import {
-  QUADRANT_LABEL,
-  QUADRANTS,
-  quadrantOf,
-  type DateStr,
-  type Quadrant,
-  type Task,
-} from '@frog/shared';
+import { QUADRANT_LABEL, QUADRANTS, type DateStr, type Quadrant, type Task } from '@frog/shared';
 import { useMemo, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { ChevronLeft } from '../components/Icons';
@@ -25,9 +18,9 @@ import { QuickAddInline } from '../components/QuickAdd';
 import { TaskRow } from '../components/TaskRow';
 import { useData } from '../data/store';
 import { useUI } from '../data/ui';
-import { rankWithLingering } from '../lib/format';
 import { useIsDesktop } from '../lib/hooks';
 import { useVisibleTasks } from '../lib/keyboard';
+import { rankByQuadrant, useUrgency } from '../lib/queries';
 import { useToday } from '../lib/time';
 
 const EMPTY: Record<Quadrant, string> = {
@@ -37,21 +30,14 @@ const EMPTY: Record<Quadrant, string> = {
   drop: 'Nothing to drop.',
 };
 
-function useQuadrants(today: DateStr): Record<Quadrant, Task[]> {
+function useQuadrants(): Record<Quadrant, Task[]> {
   const tasks = useData((s) => s.tasks);
-  const urgencyWindowDays = useData((s) => s.settings.urgencyWindowDays);
+  const ctx = useUrgency();
   const lingering = useUI((s) => s.lingering);
-  return useMemo(() => {
-    const groups: Record<Quadrant, Task[]> = { do: [], schedule: [], delegate: [], drop: [] };
-    const ctx = { today, urgencyWindowDays };
-    for (const t of rankWithLingering(Object.values(tasks), lingering, {
-      target: today,
-      settings: ctx,
-    })) {
-      groups[quadrantOf(t, ctx)].push(t);
-    }
-    return groups;
-  }, [tasks, today, urgencyWindowDays, lingering]);
+  return useMemo(
+    () => rankByQuadrant(Object.values(tasks), lingering, ctx).groups,
+    [tasks, ctx, lingering],
+  );
 }
 
 function DraggableRow({ task, today }: { task: Task; today: DateStr }) {
@@ -155,7 +141,7 @@ function MatrixOverview({ groups }: { groups: Record<Quadrant, Task[]> }) {
 export function MatrixScreen() {
   const isDesktop = useIsDesktop();
   const today = useToday();
-  const groups = useQuadrants(today);
+  const groups = useQuadrants();
   useVisibleTasks(isDesktop ? QUADRANTS.flatMap((q) => groups[q].map((t) => t.id)) : []);
 
   return (
@@ -178,7 +164,7 @@ export function QuadrantScreen() {
   const { quadrant } = useParams();
   const isDesktop = useIsDesktop();
   const today = useToday();
-  const groups = useQuadrants(today);
+  const groups = useQuadrants();
   const q = quadrant as Quadrant;
   const tasks = QUADRANTS.includes(q) ? groups[q] : [];
   useVisibleTasks(tasks.map((t) => t.id));
