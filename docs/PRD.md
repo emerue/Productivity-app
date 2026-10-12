@@ -86,7 +86,7 @@ No other users, no sharing, no teams. This is a deliberate constraint (see Non-g
 | Defaults follow the screen: inside a list → that list; My Day → added to My Day; Agenda day → due that day; otherwise the default list (Settings)                    | Live   |
 | Visible list picker and My Day toggle under the input                                                                                                                | Live   |
 | Phone: **Add** button adds and closes; keyboard Enter/Done adds and stays open; works while the keyboard is composing a word                                         | Live   |
-| Repeat tokens: `*daily`, `*weekdays`, `*weekly`, `*monthly`, `*yearly`, `*2w` (every n d/w/m/y)                                                                      | Built  |
+| Repeat tokens: `*daily`, `*weekdays`, `*weekly`, `*monthly`, `*yearly`, `*2w` (every n d/w/m/y)                                                                      | Live   |
 
 ### 7.2 Prioritise (Matrix)
 
@@ -120,17 +120,17 @@ No other users, no sharing, no teams. This is a deliberate constraint (see Non-g
 
 ### 7.5 Organise
 
-| Requirement                                                                                            | Status               |
-| ------------------------------------------------------------------------------------------------------ | -------------------- |
-| Lists: create, rename, delete (moving tasks to another list)                                           | Live                 |
-| Row **⋯** sheet: edit, My Day, quadrant, due date, move to list, delete (undo), repeat                 | Live (repeat: Built) |
-| Task panel: title, due, repeat, quadrant, list, waiting on / follow-up, steps, notes (links clickable) | Live (repeat: Built) |
-| List sort: Recently updated (default), Priority, Due date, Name; remembered per device                 | Live                 |
-| Search across all tasks                                                                                | Live                 |
-| Completed and Archived views                                                                           | Live                 |
-| Open counts in the sidebar                                                                             | Live                 |
-| List groups / folders                                                                                  | Idea                 |
-| Search in the desktop sidebar                                                                          | Idea                 |
+| Requirement                                                                                            | Status |
+| ------------------------------------------------------------------------------------------------------ | ------ |
+| Lists: create, rename, delete (moving tasks to another list)                                           | Live   |
+| Row **⋯** sheet: edit, My Day, quadrant, due date, move to list, delete (undo), repeat                 | Live   |
+| Task panel: title, due, repeat, quadrant, list, waiting on / follow-up, steps, notes (links clickable) | Live   |
+| List sort: Recently updated (default), Priority, Due date, Name; remembered per device                 | Live   |
+| Search across all tasks                                                                                | Live   |
+| Completed and Archived views                                                                           | Live   |
+| Open counts in the sidebar                                                                             | Live   |
+| List groups / folders                                                                                  | Idea   |
+| Search in the desktop sidebar                                                                          | Idea   |
 
 ### 7.6 See ahead (Agenda)
 
@@ -139,20 +139,20 @@ No other users, no sharing, no teams. This is a deliberate constraint (see Non-g
 | Day and Week views (weeks start Monday), prev/next/today, range in the URL                                            | Live   |
 | Each day: tasks due, tasks planned into that day's My Day, Delegate follow-ups; overdue on top while today is in view | Live   |
 | Busy days in the week scroll inside a capped box                                                                      | Live   |
-| Future occurrences of repeating tasks shown as quiet previews (no checkbox, not counted; tap opens the task)          | Built  |
-| A preview's colour is the quadrant the task will be in on that day                                                    | Built  |
+| Future occurrences of repeating tasks shown as quiet previews (no checkbox, not counted; tap opens the task)          | Live   |
+| A preview's colour is the quadrant the task will be in on that day                                                    | Live   |
 | Mark which Agenda rows are already in My Day; add to My Day from the Agenda                                           | Idea   |
 
 ### 7.7 Repeat
 
 | Requirement                                                                                                                                                        | Status |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
-| Set a repeat: Never, Daily, Weekdays, Weekly on <day>, Monthly on the <nth>, Yearly on <date>, Custom (every n days/weeks/months/years; weekday toggles)           | Built  |
-| Completing a repeating task creates the next one (same title, list, flags, notes, steps unticked) and says when ("Next on Thu 1 Oct"); undo restores one open task | Built  |
-| Missed occurrences are skipped; monthly dates don't drift after short months                                                                                       | Built  |
-| ↻ mark after the due date on rows and the Frog card                                                                                                                | Built  |
-| Rescheduling one occurrence keeps the pattern; clearing the due date ends the series                                                                               | Built  |
-| Evening planning's **Drop** (which clears the due date) also ends the series                                                                                       | Built  |
+| Set a repeat: Never, Daily, Weekdays, Weekly on <day>, Monthly on the <nth>, Yearly on <date>, Custom (every n days/weeks/months/years; weekday toggles)           | Live   |
+| Completing a repeating task creates the next one (same title, list, flags, notes, steps unticked) and says when ("Next on Thu 1 Oct"); undo restores one open task | Live   |
+| Missed occurrences are skipped; monthly dates don't drift after short months                                                                                       | Live   |
+| ↻ mark after the due date on rows and the Frog card                                                                                                                | Live   |
+| Rescheduling one occurrence keeps the pattern; clearing the due date ends the series                                                                               | Live   |
+| Evening planning's **Drop** (which clears the due date) also ends the series                                                                                       | Live   |
 
 ### 7.8 Sync, offline and install
 
@@ -191,16 +191,16 @@ No other users, no sharing, no teams. This is a deliberate constraint (see Non-g
 
 ## 10. Open questions and backlog
 
-| #   | Question / item                                                                                                                                         | Notes                                     |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| 1   | **My Day when nothing is planned.** Prominent "Bring them into today" (keep daily choice) vs automatic carry-over of unfinished My Day tasks (setting). | Recommended: the prominent empty state.   |
-| 2   | **Agenda and My Day overlap for today.** Mark My Day rows in the Agenda, add to My Day from it, or make the Agenda the start screen.                    |                                           |
-| 3   | **Deploy repeating tasks** and set "Monthly service review report" to monthly on the 28th.                                                              | Built, not deployed.                      |
-| 4   | List groups / folders (like To Do's "project tasks").                                                                                                   |                                           |
-| 5   | Search in the desktop sidebar.                                                                                                                          |                                           |
-| 6   | Reminders / notifications at a time (push). The schema already reserves `pushSubscriptions`.                                                            | Needs times on tasks, a non-goal for now. |
-| 7   | Notes from To Do for three imported tasks weren't visible; copy by hand.                                                                                | Data, not product.                        |
-| 8   | Bring the browser end-to-end scripts into the repo so they run with `npm test`.                                                                         | See ARCHITECTURE §10.                     |
+| #   | Question / item                                                                                                                                         | Notes                                                               |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| 1   | **My Day when nothing is planned.** Prominent "Bring them into today" (keep daily choice) vs automatic carry-over of unfinished My Day tasks (setting). | Recommended: the prominent empty state.                             |
+| 2   | **Agenda and My Day overlap for today.** Mark My Day rows in the Agenda, add to My Day from it, or make the Agenda the start screen.                    |                                                                     |
+| 3   | **Deploy repeating tasks** and set "Monthly service review report" to monthly on the 28th.                                                              | Deployed 12 Oct 2026; setting the report to monthly is yours to do. |
+| 4   | List groups / folders (like To Do's "project tasks").                                                                                                   |                                                                     |
+| 5   | Search in the desktop sidebar.                                                                                                                          |                                                                     |
+| 6   | Reminders / notifications at a time (push). The schema already reserves `pushSubscriptions`.                                                            | Needs times on tasks, a non-goal for now.                           |
+| 7   | Notes from To Do for three imported tasks weren't visible; copy by hand.                                                                                | Data, not product.                                                  |
+| 8   | Bring the browser end-to-end scripts into the repo so they run with `npm test`.                                                                         | See ARCHITECTURE §10.                                               |
 
 ## 11. Changelog
 
@@ -208,8 +208,8 @@ Newest first. One line per user-visible change; link the commit.
 
 | Date       | Change                                                                                                                                                                                                | Commit                |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
-| 2026-10-12 | Drop in evening planning ends a repeat; Agenda previews use the real quadrant colour; Drop auto-archive also clears My Day. Internal restructure (task commands, Day module, sync engine) with tests. | Built, not deployed   |
-| 2026-10-03 | Repeating tasks (picker, tokens, auto next, Agenda previews). PRD and architecture docs.                                                                                                              | Built, not deployed   |
+| 2026-10-12 | Drop in evening planning ends a repeat; Agenda previews use the real quadrant colour; Drop auto-archive also clears My Day. Internal restructure (task commands, Day module, sync engine) with tests. | `e040871`             |
+| 2026-10-03 | Repeating tasks (picker, tokens, auto next, Agenda previews). PRD and architecture docs.                                                                                                              | `e040871`             |
 | 2026-09-30 | Phone **+** sheet: **Add** button adds; keyboard Enter adds even while composing.                                                                                                                     | `98639a6`             |
 | 2026-09-29 | List sorting (recently updated first); sticky headers; long sections scroll in capped boxes.                                                                                                          | `8ecadf3`             |
 | 2026-09-28 | Quick add follows the screen; row ⋯ actions; Agenda (day/week); list names on rows, sidebar counts, My Day "Completed" and "From earlier days". Open Microsoft To Do tasks imported.                  | `eb92697`             |
