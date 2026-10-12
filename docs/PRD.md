@@ -93,7 +93,7 @@ No other users, no sharing, no teams. This is a deliberate constraint (see Non-g
 | Requirement                                                                                                        | Status |
 | ------------------------------------------------------------------------------------------------------------------ | ------ |
 | Matrix: 2×2 on desktop with drag between cells; overview + per-quadrant view on phone                              | Live   |
-| Each quadrant says what it means ("Important and urgent"…); the phone overview lists each quadrant's top 3 tasks   | Built  |
+| Each quadrant says what it means ("Important and urgent"…); the phone overview lists each quadrant's top 3 tasks   | Live   |
 | Move to quadrant from any task; moving to Schedule/Drop while the due date keeps it urgent asks to change the date | Live   |
 | Delegate captures "Waiting on" and a follow-up date                                                                | Live   |
 | Tasks left in Drop are archived automatically after 14 days (setting)                                              | Live   |
@@ -106,9 +106,9 @@ No other users, no sharing, no teams. This is a deliberate constraint (see Non-g
 | Evening banner from plan time (default 20:00): **Plan tomorrow** in three steps (review today's leftovers: tomorrow / pick a date / drop; choose tasks with suggestions; pick the Frog) | Live                      |
 | **Plan today** for a day that wasn't planned                                                                                                                                            | Live                      |
 | A Frog that keeps slipping (postponed twice, no steps) gets a prompt to slice it into steps                                                                                             | Live                      |
-| My Day: Frog card, planned tasks at full strength, "full day" hint past Frog + 4; **Plan tomorrow** (or **Plan today**) button in the header                                            | Built                     |
-| My Day: "Needs a decision" block (due today or overdue; left over from the last 14 days), first 3 of each shown, Add / Add all; "Completed"                                             | Built                     |
-| Task rows: title, then one line of details in words (due, next step with progress or who it's waiting on, list, repeat); no colour edge                                                 | Built                     |
+| My Day: Frog card, planned tasks at full strength, "full day" hint past Frog + 4; **Plan tomorrow** (or **Plan today**) button in the header                                            | Live                      |
+| My Day: "Needs a decision" block (due today or overdue; left over from the last 14 days), first 3 of each shown, Add / Add all; "Completed"                                             | Live                      |
+| Task rows: title, then one line of details in words (due, next step with progress or who it's waiting on, list, repeat); no colour edge                                                 | Live                      |
 | My Day empty state that surfaces leftovers prominently ("Bring them into today")                                                                                                        | Idea (see Open questions) |
 
 ### 7.4 Do
@@ -210,7 +210,7 @@ Newest first. One line per user-visible change; link the commit.
 
 | Date       | Change                                                                                                                                                                                                   | Commit                |
 | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
-| 2026-10-12 | Clearer My Day, rows and Matrix: "Needs a decision" block, visible Plan button, rows say due dates and step progress in words, quadrants explain themselves. Fixed My Day styles that were never loaded. | Built, not deployed   |
+| 2026-10-12 | Clearer My Day, rows and Matrix: "Needs a decision" block, visible Plan button, rows say due dates and step progress in words, quadrants explain themselves. Fixed My Day styles that were never loaded. | `881fb3a`             |
 | 2026-10-12 | Drop in evening planning ends a repeat; Agenda previews use the real quadrant colour; Drop auto-archive also clears My Day. Internal restructure (task commands, Day module, sync engine) with tests.    | `e040871`             |
 | 2026-10-03 | Repeating tasks (picker, tokens, auto next, Agenda previews). PRD and architecture docs.                                                                                                                 | `e040871`             |
 | 2026-09-30 | Phone **+** sheet: **Add** button adds; keyboard Enter adds even while composing.                                                                                                                        | `98639a6`             |
