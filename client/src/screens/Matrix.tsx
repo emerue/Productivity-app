@@ -9,10 +9,17 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from '@dnd-kit/core';
-import { QUADRANT_LABEL, QUADRANTS, type DateStr, type Quadrant, type Task } from '@frog/shared';
+import {
+  QUADRANT_LABEL,
+  QUADRANT_MEANING,
+  QUADRANTS,
+  type DateStr,
+  type Quadrant,
+  type Task,
+} from '@frog/shared';
 import { useMemo, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
-import { ChevronLeft } from '../components/Icons';
+import { ChevronLeft, ChevronRight } from '../components/Icons';
 import { useMoveTask } from '../components/MoveSheet';
 import { QuickAddInline } from '../components/QuickAdd';
 import { TaskRow } from '../components/TaskRow';
@@ -49,7 +56,7 @@ function DraggableRow({ task, today }: { task: Task; today: DateStr }) {
       data-dragging={isDragging || undefined}
       {...listeners}
     >
-      <TaskRow task={task} today={today} edge showList />
+      <TaskRow task={task} today={today} showList />
     </div>
   );
 }
@@ -64,11 +71,14 @@ function Cell({ quadrant, tasks, today }: { quadrant: Quadrant; tasks: Task[]; t
       data-over={isOver || undefined}
       aria-labelledby={`cell-${quadrant}`}
     >
-      <h2 className="cell__title" id={`cell-${quadrant}`}>
-        <span className="q-dot" data-q={quadrant} aria-hidden="true" />
-        {QUADRANT_LABEL[quadrant]}
-        <span className="cell__count num">{tasks.length}</span>
-      </h2>
+      <div className="cell__head">
+        <h2 className="cell__title" id={`cell-${quadrant}`}>
+          <span className="q-dot" data-q={quadrant} aria-hidden="true" />
+          {QUADRANT_LABEL[quadrant]}
+          <span className="cell__count num">{tasks.length}</span>
+        </h2>
+        <p className="cell__meaning">{QUADRANT_MEANING[quadrant]}</p>
+      </div>
       <div className="cell__scroll">
         {tasks.length === 0 ? (
           <p className="cell__empty">{EMPTY[quadrant]}</p>
@@ -120,20 +130,40 @@ function MatrixGrid({ groups, today }: { groups: Record<Quadrant, Task[]>; today
   );
 }
 
-/** Mobile: 2×2 overview with name, count and top task. */
+/** How many task titles each quadrant previews on the phone. */
+const OVERVIEW_TOP = 3;
+
+/** Mobile: each quadrant with what it means and its top tasks; tap for all. */
 function MatrixOverview({ groups }: { groups: Record<Quadrant, Task[]> }) {
   return (
     <div className="matrix-overview">
-      {QUADRANTS.map((q) => (
-        <Link key={q} to={`/matrix/${q}`} className="q-cell">
-          <span className="q-cell__head">
-            <span className="q-dot" data-q={q} aria-hidden="true" />
-            {QUADRANT_LABEL[q]}
-          </span>
-          <span className="q-cell__count num">{groups[q].length}</span>
-          <span className="q-cell__top">{groups[q][0]?.title ?? 'Empty'}</span>
-        </Link>
-      ))}
+      {QUADRANTS.map((q) => {
+        const tasks = groups[q];
+        const rest = tasks.length - OVERVIEW_TOP;
+        return (
+          <Link key={q} to={`/matrix/${q}`} className="q-cell" data-q={q}>
+            <span className="q-cell__head">
+              <span className="q-dot" aria-hidden="true" />
+              {QUADRANT_LABEL[q]}
+              <span className="q-cell__count num">{tasks.length}</span>
+              <ChevronRight className="q-cell__chevron" />
+            </span>
+            <span className="q-cell__meaning">{QUADRANT_MEANING[q]}</span>
+            {tasks.length === 0 ? (
+              <span className="q-cell__empty">{EMPTY[q]}</span>
+            ) : (
+              <span className="q-cell__tasks">
+                {tasks.slice(0, OVERVIEW_TOP).map((t) => (
+                  <span key={t.id} className="q-cell__task">
+                    {t.title || 'Untitled'}
+                  </span>
+                ))}
+                {rest > 0 && <span className="q-cell__rest">and {rest} more</span>}
+              </span>
+            )}
+          </Link>
+        );
+      })}
     </div>
   );
 }
@@ -178,6 +208,7 @@ export function QuadrantScreen() {
           <ChevronLeft />
         </Link>
         <h1>{QUADRANT_LABEL[q]}</h1>
+        <span className="screen-head__date">{QUADRANT_MEANING[q]}</span>
       </header>
       <nav className="segmented" aria-label="Quadrant">
         {QUADRANTS.map((x) => (
@@ -198,7 +229,7 @@ export function QuadrantScreen() {
       ) : (
         <div className="rows" role="list">
           {tasks.map((t) => (
-            <TaskRow key={t.id} task={t} today={today} edge showList />
+            <TaskRow key={t.id} task={t} today={today} showList />
           ))}
         </div>
       )}

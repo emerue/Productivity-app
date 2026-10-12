@@ -108,15 +108,6 @@
   background: var(--paper);
 }
 
-.row[data-q]::before {
-  content: '';
-  position: absolute;
-  inset: 0 auto 0 0;
-  z-index: 2;
-  width: 3px;
-  background: var(--q-color);
-}
-
 .row__inner {
   position: relative;
   z-index: 1;
@@ -127,10 +118,6 @@
   background: var(--paper);
   touch-action: pan-y;
   transition: transform 200ms var(--ease-out);
-}
-
-.row[data-q] .row__inner {
-  padding-left: 12px;
 }
 
 .row__inner[data-dragging] {
@@ -167,16 +154,26 @@
   color: var(--ink-2);
 }
 
-.row__meta {
+/* The line of details under a title: each item names itself, spaced apart. */
+.row__details {
   display: flex;
-  flex: none;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
-  padding-left: 10px;
+  gap: 2px 14px;
+  max-height: 2.9em;
+  margin-top: 2px;
+  overflow: hidden;
   color: var(--ink-2);
   font-size: var(--fs-meta);
-  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
   transition: color 500ms ease-out;
+}
+
+.row__details > span {
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .is-overdue {
@@ -184,6 +181,7 @@
 }
 
 .row__note {
+  display: inline-flex;
   color: var(--ink-3);
 }
 
@@ -195,32 +193,6 @@
   width: 36px;
   margin-right: -8px;
   color: var(--ink-3);
-}
-
-.row__list {
-  max-width: 8rem;
-  padding: 1px 8px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-@media (max-width: 420px) {
-  .row__list {
-    max-width: 5.5rem;
-  }
-}
-
-.row[data-dimmed] .row__title,
-.row[data-dimmed] .row__sub,
-.row[data-dimmed] .row__meta {
-  color: var(--ink-3);
-}
-
-.row[data-dimmed] .row__meta .is-overdue {
-  color: var(--danger);
 }
 
 .row[data-done] .row__title {
@@ -363,7 +335,10 @@
 }
 
 .frog__meta {
-  margin-top: 2px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 14px;
+  margin-top: 4px;
   color: var(--ink-2);
   font-size: var(--fs-meta);
 }
@@ -442,6 +417,12 @@
   padding: 16px 20px 6px;
   border-radius: var(--radius-card);
   background: var(--frog-tint);
+}
+
+.pick-frog__lead {
+  margin-top: 2px;
+  color: var(--ink-2);
+  font-size: var(--fs-meta);
 }
 
 .pick-frog__list {
@@ -1043,8 +1024,11 @@ select.meta-input {
 
 .row__repeat {
   display: inline-flex;
-  vertical-align: -2px;
-  margin-left: 4px;
+  align-items: center;
+  gap: 4px;
+}
+
+.row__repeat svg {
   color: var(--ink-3);
 }
 
@@ -1169,7 +1153,7 @@ select.meta-input {
 }
 
 @media (max-width: 420px) {
-  .ghost__meta .row__list {
+  .ghost__list {
     display: none;
   }
 }

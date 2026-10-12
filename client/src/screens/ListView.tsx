@@ -230,7 +230,7 @@ function OneList({ list }: { list: List }) {
               </h2>
               <div className="rows" role="list">
                 {groups[q].map((t) => (
-                  <TaskRow key={t.id} task={t} today={today} edge />
+                  <TaskRow key={t.id} task={t} today={today} />
                 ))}
               </div>
             </section>
@@ -238,7 +238,7 @@ function OneList({ list }: { list: List }) {
         : flat.length > 0 && (
             <div className="rows list-view__flat" role="list" aria-label={`${list.name} tasks`}>
               {flat.map((t) => (
-                <TaskRow key={t.id} task={t} today={today} edge />
+                <TaskRow key={t.id} task={t} today={today} />
               ))}
             </div>
           )}

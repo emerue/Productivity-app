@@ -48,7 +48,7 @@ Small calls made while building. The brief's settled decisions are not repeated 
 - **Non-Start emphasis uses ink, not green.** Green is reserved for Frog UI, Start, the running timer and focus rings. Actions that need weight but aren't Start (Sign in, a dialog's confirm, planning's Next/Finish) use `btn--ink`: `--ink` fill with `--paper` text, the same pair as toasts.
 - **`--ink-3` contrast (not changed, flagged).** Dimmed tasks use `--ink-3` as the brief specifies. On `--paper` that is about 2.5:1 in light mode and 3.7:1 in dark mode, below AA for body text. The tokens are kept as written because dimming is a deliberate de-emphasis and the text is still readable. If strict AA matters more, darken `--ink-3` to about `#79827D` (light).
 
-- **Matrix cells are separated by hairlines, not drawn as four cards**, to avoid "identical rounded cards for everything". The mobile overview uses the same hairline 2×2.
+- **Matrix cells are separated by hairlines, not drawn as four cards**, to avoid "identical rounded cards for everything". The phone overview stacks the quadrants below 560px wide (each with its meaning and top 3 tasks) and uses the hairline 2×2 above that.
 - **Empty copy for Schedule, Delegate and Drop** (the brief only gives Do): "Nothing scheduled.", "Nobody to wait on.", "Nothing to drop."
 - **Ordering inside quadrants and lists** uses the suggestion score for today (then due date, then age), so the most pressing task is always on top without a separate sort setting.
 - **Due-date conflict** is a small dialog (bottom sheet on mobile) with a date field, "Change date" and "Keep as is". The move itself is applied at once (flags set), so "Keep as is" just leaves the task in Do until the date moves out of the window.
@@ -85,6 +85,12 @@ Small calls made while building. The brief's settled decisions are not repeated 
 - **Commands live in `shared`, not the client.** They're domain rules like the rest of `shared`, and the server's jobs already need some of them (the Drop auto-archive now clears Days with the same `daysWithout`).
 - **Sync engine with adapters.** The outbox/ack/409 protocol takes its transport and storage as arguments. Two adapters exist (HTTP + IndexedDB in the app, the real `StoreManager` + no-op storage in tests), which is what justifies the seam.
 - **Agenda previews use the quadrant on their date.** A preview's colour is `quadrantOf` the task as if it were due that day, so it matches what the task will show when it arrives (it used to be worked out from flags alone and could never show Delegate).
+
+- **Intuitiveness pass, same look (12 Oct).** The client chose to fix structure and wording first and keep the visual identity; the worst offenders went first (My Day, rows, Matrix). Lists, the task panel, planning and navigation are the second pass.
+- **No quadrant colour edge on rows.** A 3px colour on the left meant a quadrant but nothing said so. Colour now only appears next to a quadrant's name (Matrix, Priority sort), and each quadrant carries a one-line meaning.
+- **Row details in words.** "Due tomorrow", "Next: Pull stats (0 of 2)", "Overdue since 9 Oct" replace "Tomorrow" and "0/2". Items are separated by space, not a dot, and wrap to a second line before being cut off.
+- **No dimming after the Frog.** Greyed rows read as disabled. The Frog card's size already says "this first".
+- **"Needs a decision" replaces two collapsed toggles.** Overdue and leftover tasks are shown (first 3 of each, then "Show all") instead of hidden behind toggles that looked like plain text. The old styles for that section lived in `screens.css`, which was never imported; it is now.
 
 ## Proposed (not built)
 

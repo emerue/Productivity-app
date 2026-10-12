@@ -61,7 +61,7 @@ function SearchResults({ query }: { query: string }) {
   return (
     <div className="rows" role="list" aria-label="Search results">
       {results.map((t) => (
-        <TaskRow key={t.id} task={t} today={today} edge={t.status === 'open'} showList />
+        <TaskRow key={t.id} task={t} today={today} showList />
       ))}
     </div>
   );

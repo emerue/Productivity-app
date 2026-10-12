@@ -12,7 +12,8 @@ import { reopen } from '../data/actions';
 import { useData } from '../data/store';
 import { requestComplete } from '../lib/complete';
 import { useReducedMotion, useTaskDetail } from '../lib/hooks';
-import { formatClock, formatDue } from '../lib/time';
+import { dueLabel } from '../lib/format';
+import { formatClock } from '../lib/time';
 import { CheckCircle } from './CheckCircle';
 import { FrogGlyph } from './Icons';
 
@@ -26,11 +27,6 @@ function FrogCard({ task, today }: FrogProps) {
   const { openTask } = useTaskDetail();
   const next = nextAction(task);
   const steps = stepProgress(task);
-  const meta = [
-    steps.total > 0 ? `${steps.done}/${steps.total}` : null,
-    task.due ? formatDue(task.due, today) : null,
-    task.repeat ? `↻ ${repeatShort(task.repeat)}` : null,
-  ].filter(Boolean);
   const overdue = isOverdue(task, today);
   const done = task.status === 'done';
 
@@ -50,20 +46,19 @@ function FrogCard({ task, today }: FrogProps) {
           <h2 id="frog-title" className="frog__title">
             <button onClick={() => openTask(task.id)}>{task.title || 'Untitled'}</button>
           </h2>
-          {next && <p className="frog__next">Next: {next.title}</p>}
-          {meta.length > 0 && (
-            <p className="frog__meta num">
-              {steps.total > 0 && (
-                <span>
-                  {steps.done}/{steps.total}
-                </span>
-              )}
-              {steps.total > 0 && task.due && <span aria-hidden="true"> · </span>}
+          {next && (
+            <p className="frog__next">
+              Next: {next.title} ({steps.done} of {steps.total} steps)
+            </p>
+          )}
+          {(task.due || task.repeat) && (
+            <p className="frog__meta">
               {task.due && (
                 <span className={overdue ? 'is-overdue' : undefined}>
-                  {formatDue(task.due, today)}
+                  {dueLabel(task.due, today)}
                 </span>
               )}
+              {task.repeat && <span>Repeats {repeatShort(task.repeat).toLowerCase()}</span>}
             </p>
           )}
         </div>
@@ -79,7 +74,7 @@ function FrogCard({ task, today }: FrogProps) {
           className="btn btn--text frog__five"
           onClick={() => navigate(`/focus/${task.id}?minutes=5`)}
         >
-          Just 5 minutes
+          Start a 5-minute timer
         </button>
       </div>
     </section>

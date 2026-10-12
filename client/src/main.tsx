@@ -9,6 +9,7 @@ import './styles/base.css';
 import './styles/components.css';
 import './styles/tasks.css';
 import './styles/views.css';
+import './styles/screens.css';
 import './styles/focus.css';
 import './styles/plan.css';
 import './styles/settings.css';

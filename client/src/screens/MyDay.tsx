@@ -1,5 +1,5 @@
 import { dayOf, todayPlan, type DateStr, type Task } from '@frog/shared';
-import { useMemo, useState } from 'react';
+import { useId, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FrogSlot } from '../components/FrogCard';
 import { ChevronRight, FrogGlyph } from '../components/Icons';
@@ -12,7 +12,8 @@ import { useData } from '../data/store';
 import { useUI } from '../data/ui';
 import { useTaskDetail } from '../lib/hooks';
 import { useVisibleTasks } from '../lib/keyboard';
-import { formatDue, formatHeaderDate, useToday } from '../lib/time';
+import { dueLabel } from '../lib/format';
+import { formatHeaderDate, useToday } from '../lib/time';
 
 function PickFrog({ candidates }: { candidates: Task[] }) {
   return (
@@ -21,6 +22,7 @@ function PickFrog({ candidates }: { candidates: Task[] }) {
         <FrogGlyph size={20} />
         Pick today's Frog
       </p>
+      <p className="pick-frog__lead">The important task you'll do first.</p>
       <ul className="pick-frog__list">
         {candidates.map((t) => (
           <li key={t.id}>
@@ -34,86 +36,67 @@ function PickFrog({ candidates }: { candidates: Task[] }) {
   );
 }
 
-function DueUnplanned({ tasks, today }: { tasks: Task[]; today: DateStr }) {
-  const [open, setOpen] = useState(false);
+/** How many rows a "Needs a decision" group shows before "Show all". */
+const PREVIEW = 3;
+
+function DecideGroup({ title, tasks, today }: { title: string; tasks: Task[]; today: DateStr }) {
+  const [all, setAll] = useState(false);
   const { openTask } = useTaskDetail();
+  const id = useId();
+  if (tasks.length === 0) return null;
+  const shown = all ? tasks : tasks.slice(0, PREVIEW);
   return (
-    <section className="due-unplanned">
-      <button
-        className="due-unplanned__toggle"
-        aria-expanded={open}
-        onClick={() => setOpen((o) => !o)}
-      >
-        <span>
-          Due today, not planned <span className="num">({tasks.length})</span>
-        </span>
-        <ChevronRight className="due-unplanned__chevron" />
-      </button>
-      {open && (
-        <ul className="due-unplanned__list scroll-box">
-          {tasks.map((t) => (
-            <li key={t.id} className="due-unplanned__row">
-              <button className="due-unplanned__main" onClick={() => openTask(t.id)}>
-                <span className="row__title">{t.title}</span>
-                <span className={t.due! < today ? 'row__due is-overdue' : 'row__due'}>
-                  {formatDue(t.due!, today)}
+    <div className="decide__group">
+      <h3 className="decide__subtitle" id={id}>
+        {title} <span className="num">({tasks.length})</span>
+      </h3>
+      <ul className={all ? 'decide__list scroll-box' : 'decide__list'} aria-labelledby={id}>
+        {shown.map((t) => (
+          <li key={t.id} className="decide__row">
+            <button className="decide__main" onClick={() => openTask(t.id)}>
+              <span className="row__title">{t.title}</span>
+              {t.due && (
+                <span className={t.due < today ? 'decide__due is-overdue' : 'decide__due'}>
+                  {dueLabel(t.due, today)}
                 </span>
-              </button>
-              <button className="btn btn--text btn--small" onClick={() => addToMyDay(t.id)}>
-                Add to My Day
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
+              )}
+            </button>
+            <button className="btn btn--secondary btn--small" onClick={() => addToMyDay(t.id)}>
+              Add to My Day
+            </button>
+          </li>
+        ))}
+      </ul>
+      <div className="decide__more">
+        {tasks.length > PREVIEW && (
+          <button className="btn btn--text btn--small" onClick={() => setAll((a) => !a)}>
+            {all ? 'Show fewer' : `Show all ${tasks.length}`}
+          </button>
+        )}
+        {tasks.length > 1 && (
+          <button
+            className="btn btn--text btn--small"
+            onClick={() => tasks.forEach((t) => addToMyDay(t.id))}
+          >
+            Add all {tasks.length} to My Day
+          </button>
+        )}
+      </div>
+    </div>
   );
 }
 
-function FromEarlier({ tasks, today }: { tasks: Task[]; today: DateStr }) {
-  const [open, setOpen] = useState(false);
-  const { openTask } = useTaskDetail();
+/** Open work that isn't in today's plan: overdue or due today, and leftovers. */
+function NeedsDecision({ due, earlier, today }: { due: Task[]; earlier: Task[]; today: DateStr }) {
+  if (due.length === 0 && earlier.length === 0) return null;
   return (
-    <section className="due-unplanned">
-      <button
-        className="due-unplanned__toggle"
-        aria-expanded={open}
-        onClick={() => setOpen((o) => !o)}
-      >
-        <span>
-          From earlier days <span className="num">({tasks.length})</span>
-        </span>
-        <ChevronRight className="due-unplanned__chevron" />
-      </button>
-      {open && (
-        <>
-          <ul className="due-unplanned__list scroll-box">
-            {tasks.map((t) => (
-              <li key={t.id} className="due-unplanned__row">
-                <button className="due-unplanned__main" onClick={() => openTask(t.id)}>
-                  <span className="row__title">{t.title}</span>
-                  {t.due && (
-                    <span className={t.due < today ? 'row__due is-overdue' : 'row__due'}>
-                      {formatDue(t.due, today)}
-                    </span>
-                  )}
-                </button>
-                <button className="btn btn--text btn--small" onClick={() => addToMyDay(t.id)}>
-                  Add to My Day
-                </button>
-              </li>
-            ))}
-          </ul>
-          {tasks.length > 1 && (
-            <button
-              className="btn btn--text btn--small due-unplanned__all"
-              onClick={() => tasks.forEach((t) => addToMyDay(t.id))}
-            >
-              Add all to My Day
-            </button>
-          )}
-        </>
-      )}
+    <section className="decide" aria-labelledby="decide-title">
+      <h2 className="decide__title" id="decide-title">
+        Needs a decision
+      </h2>
+      <p className="decide__lead">Not in today's plan yet. Add what you'll do today.</p>
+      <DecideGroup title="Due today or overdue" tasks={due} today={today} />
+      <DecideGroup title="Left over from earlier days" tasks={earlier} today={today} />
     </section>
   );
 }
@@ -156,6 +139,8 @@ export function MyDayScreen() {
 
   const { frog, rows, dueUnplanned, earlier, completed, hasAnything, allDone, candidates } = view;
   const frogOpen = frog?.status === 'open';
+  const planLabel = day.planned ? 'Plan tomorrow' : 'Plan today';
+  const planHref = day.planned ? '/plan' : '/plan?day=today';
   useVisibleTasks([...(frogOpen ? [frog.id] : []), ...rows.map((t) => t.id)]);
 
   return (
@@ -164,11 +149,18 @@ export function MyDayScreen() {
         <header className="screen-head">
           <h1>My Day</h1>
           <span className="screen-head__date">{formatHeaderDate(today)}</span>
+          {hasAnything && (
+            <Link className="btn btn--secondary btn--small" to={planHref}>
+              {planLabel}
+            </Link>
+          )}
           <Menu
             label="My Day options"
             items={[
-              { label: 'Plan tomorrow', onSelect: () => navigate('/plan') },
-              !day.planned && { label: 'Plan today', onSelect: () => navigate('/plan?day=today') },
+              (!day.planned || !hasAnything) && {
+                label: 'Plan tomorrow',
+                onSelect: () => navigate('/plan'),
+              },
               { label: 'Settings', onSelect: () => navigate('/settings') },
             ]}
           />
@@ -179,7 +171,11 @@ export function MyDayScreen() {
 
       {!hasAnything && (
         <div className="empty-state">
-          <p>Nothing planned for today.</p>
+          <p>
+            Nothing planned for today.
+            {(dueUnplanned.length > 0 || earlier.length > 0) &&
+              ' Pick from what needs a decision below, or plan the whole day.'}
+          </p>
           <Link className="btn btn--secondary" to="/plan?day=today">
             Plan today
           </Link>
@@ -192,14 +188,7 @@ export function MyDayScreen() {
       {rows.length > 0 && (
         <div className="rows" role="list" aria-label="My Day">
           {rows.map((t) => (
-            <TaskRow
-              key={t.id}
-              task={t}
-              today={today}
-              inMyDay
-              showList
-              dimmed={frogOpen && !(t.due !== null && t.due <= today)}
-            />
+            <TaskRow key={t.id} task={t} today={today} inMyDay showList />
           ))}
         </div>
       )}
@@ -222,8 +211,7 @@ export function MyDayScreen() {
         </p>
       )}
 
-      {dueUnplanned.length > 0 && <DueUnplanned tasks={dueUnplanned} today={today} />}
-      {earlier.length > 0 && <FromEarlier tasks={earlier} today={today} />}
+      <NeedsDecision due={dueUnplanned} earlier={earlier} today={today} />
       {completed.length > 0 && <CompletedToday tasks={completed} today={today} />}
     </section>
   );

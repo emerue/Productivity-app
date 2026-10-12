@@ -12,6 +12,14 @@ export const QUADRANT_LABEL: Record<Quadrant, string> = {
   drop: 'Drop',
 };
 
+/** What each quadrant means, in plain words (shown next to its name). */
+export const QUADRANT_MEANING: Record<Quadrant, string> = {
+  do: 'Important and urgent',
+  schedule: 'Important, not urgent',
+  delegate: 'Urgent, not important',
+  drop: 'Not urgent or important',
+};
+
 export interface UrgencyContext {
   /** The logical date urgency is judged against. */
   today: DateStr;

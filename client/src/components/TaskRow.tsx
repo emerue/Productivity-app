@@ -1,10 +1,9 @@
 import {
   hasNotes,
   isInDay,
-  repeatLabel,
-  isOverdue,
   quadrantOf,
-  stepProgress,
+  repeatLabel,
+  repeatShort,
   type DateStr,
   type Task,
 } from '@frog/shared';
@@ -14,9 +13,8 @@ import { addToMyDay, reopen } from '../data/actions';
 import { useData } from '../data/store';
 import { useUI } from '../data/ui';
 import { requestComplete } from '../lib/complete';
-import { taskSubtitle } from '../lib/format';
+import { rowDetails } from '../lib/format';
 import { useTaskDetail } from '../lib/hooks';
-import { formatDue } from '../lib/time';
 import { CheckCircle } from './CheckCircle';
 import { MoreIcon, NoteIcon, PlayIcon, RepeatIcon } from './Icons';
 import { useUrgency } from '../lib/queries';
@@ -24,9 +22,6 @@ import { useUrgency } from '../lib/queries';
 interface TaskRowProps {
   task: Task;
   today: DateStr;
-  dimmed?: boolean;
-  /** 3px quadrant edge (Matrix and Lists). */
-  edge?: boolean;
   /** Hide the "My Day" swipe action (already in My Day). */
   inMyDay?: boolean;
   /** Show the task's list name (Agenda, where rows from every list mix). */
@@ -36,14 +31,7 @@ interface TaskRowProps {
 const REVEAL_WIDTH = 216;
 const COMPLETE_AT = 96;
 
-export const TaskRow = memo(function TaskRow({
-  task,
-  today,
-  dimmed,
-  edge,
-  inMyDay,
-  showList,
-}: TaskRowProps) {
+export const TaskRow = memo(function TaskRow({ task, today, inMyDay, showList }: TaskRowProps) {
   const navigate = useNavigate();
   const { openTask } = useTaskDetail();
   const ctx = useUrgency();
@@ -51,10 +39,8 @@ export const TaskRow = memo(function TaskRow({
   const lingering = useUI((s) => task.id in s.lingering);
   const listName = useData((s) => (showList ? s.lists[task.listId]?.name : undefined));
   const quadrant = quadrantOf(task, { ...ctx, today });
-  const subtitle = taskSubtitle(task, quadrant, today);
-  const steps = stepProgress(task);
   const done = task.status === 'done';
-  const overdue = !done && isOverdue(task, today);
+  const details = rowDetails(task, quadrant, today, listName);
 
   // Swipe (touch only): right completes, left reveals actions.
   const [dx, setDx] = useState(0);
@@ -144,8 +130,6 @@ export const TaskRow = memo(function TaskRow({
       className="row"
       role="listitem"
       data-task-id={task.id}
-      data-q={edge ? quadrant : undefined}
-      data-dimmed={dimmed || undefined}
       data-selected={selected || undefined}
       data-done={done || undefined}
       data-lingering={lingering || undefined}
@@ -204,28 +188,28 @@ export const TaskRow = memo(function TaskRow({
           }}
         >
           <span className="row__title">{task.title || 'Untitled'}</span>
-          {subtitle && <span className="row__sub">{subtitle}</span>}
-        </button>
-        <span className="row__meta">
-          {listName && <span className="row__list">{listName}</span>}
-          {task.due && !done && (
-            <span className={overdue ? 'row__due is-overdue' : 'row__due'}>
-              {formatDue(task.due, today)}
-              {task.repeat && (
+          {(details.length > 0 || task.repeat || hasNotes(task)) && (
+            <span className="row__details">
+              {details.map((d, i) => (
+                <span key={i} className={d.overdue ? 'is-overdue' : undefined}>
+                  {d.text}
+                </span>
+              ))}
+              {task.repeat && !done && (
                 <span className="row__repeat" title={repeatLabel(task.repeat)}>
                   <RepeatIcon />
-                  <span className="visually-hidden">, repeats {repeatLabel(task.repeat)}</span>
+                  {repeatShort(task.repeat)}
+                </span>
+              )}
+              {hasNotes(task) && (
+                <span className="row__note">
+                  <NoteIcon />
+                  <span className="visually-hidden">Has notes</span>
                 </span>
               )}
             </span>
           )}
-          {steps.total > 0 && (
-            <span className="num" aria-label={`${steps.done} of ${steps.total} steps`}>
-              {steps.done}/{steps.total}
-            </span>
-          )}
-          {hasNotes(task) && <NoteIcon className="row__note" />}
-        </span>
+        </button>
         {!done && (
           <button
             className="icon-btn row__start"

@@ -57,7 +57,7 @@ function UpcomingRow({ task, date }: { task: Task; date: DateStr }) {
         <RepeatIcon className="ghost__icon" />
         <span className="ghost__title">{task.title}</span>
         <span className="ghost__meta">
-          {list && <span className="row__list">{list}</span>}
+          {list && <span className="ghost__list">{list}</span>}
           <span>{repeatShort(task.repeat!)}</span>
         </span>
       </button>
@@ -167,7 +167,7 @@ export function AgendaScreen() {
           </h2>
           <div className="rows scroll-box" role="list">
             {overdue.map((t) => (
-              <TaskRow key={t.id} task={t} today={today} edge showList />
+              <TaskRow key={t.id} task={t} today={today} showList />
             ))}
           </div>
         </section>
@@ -195,7 +195,7 @@ export function AgendaScreen() {
           {d.tasks.length > 0 && (
             <div className={view === 'week' ? 'rows scroll-box' : 'rows'} role="list">
               {d.tasks.map((t) => (
-                <TaskRow key={t.id} task={t} today={today} edge showList />
+                <TaskRow key={t.id} task={t} today={today} showList />
               ))}
             </div>
           )}
